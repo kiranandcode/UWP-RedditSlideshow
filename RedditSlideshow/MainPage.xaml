@@ -7,7 +7,60 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Page.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Style/MainPageStyle.xaml" />
+                <ResourceDictionary>
+                    <local:ObservableBooleanConverter x:Key="booleanconverter"/>
+                </ResourceDictionary>
 
-    </Grid>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Page.Resources>
+
+
+
+    <ScrollViewer Background="{StaticResource MainTheme_color}">
+        <RelativePanel>
+            <TextBlock Text="Reddit Slideshow" 
+                       Style="{StaticResource HeaderLogoStyle}"
+                       RelativePanel.Above="MainPageContentPanel" 
+                       RelativePanel.AlignHorizontalCenterWith="MainPageContentPanel"/>
+
+            <StackPanel Name="MainPageContentPanel" 
+                Style="{StaticResource MainPageContentStyle}"
+                Background="{StaticResource MainTheme_color_highlight}" 
+                RelativePanel.AlignHorizontalCenterWithPanel="True"
+                RelativePanel.AlignVerticalCenterWithPanel="True">
+
+                <TextBlock 
+                    Style="{StaticResource MainPagePromptStyle}"
+                    Text="Enter the subreddits to source for the images:"
+                    FontSize="20"/>
+
+                <ListView Name="LinkListView" ItemsSource="{x:Bind LinkList}" HorizontalAlignment="Center" HorizontalContentAlignment="Stretch" >
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="local:Link">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBox Name="text" Text="{x:Bind Url, Mode=TwoWay}" MinWidth="300" TextWrapping="Wrap" />
+                                <Button  Click="removeLink_Click" HorizontalAlignment="Center">
+                                    <SymbolIcon Symbol="Delete"/>
+                                </Button>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+                
+                
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button Click="addLink_Click">
+                        <SymbolIcon Symbol="Add" />
+                    </Button>
+                    <Button Content="Generate Slideshow" Click="generateSlideShow_Click"/>
+                </StackPanel>
+            </StackPanel>
+        </RelativePanel>
+    </ScrollViewer>
 </Page>

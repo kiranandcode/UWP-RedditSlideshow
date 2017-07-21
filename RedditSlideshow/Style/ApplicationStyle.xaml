@@ -1,0 +1,31 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:RedditSlideshow.Style">
+
+    <SolidColorBrush x:Key="MainTheme_color" Color="#2d2d86"/>
+    <SolidColorBrush x:Key="MainTheme_color_highlight" Color="#4a41c0"/>
+    <SolidColorBrush x:Key="MainTheme_color_accent" Color="#161743"/>
+    <SolidColorBrush x:Key="MainTheme_color_bright" Color="#f8f5ea" />
+
+
+
+    <Style TargetType="Button">
+        <Setter Property="FontFamily" Value="Verdana"/>
+
+    </Style>
+
+
+    <Style TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="Verdana"/>
+
+    </Style>
+
+
+    <Style TargetType="TextBox">
+        <Setter Property="FontFamily" Value="Verdana"/>
+    </Style>
+    
+    
+    
+</ResourceDictionary>
