@@ -23,10 +23,18 @@ namespace RedditSlideshow
 {
 
     public class Link {
-        public string Url { get; set; }
+        private string url;
+        public string Url {
+            get {
+                return url;
+            }
+            set {
+                url = value;
+            }
+        }
         public Link()
         {
-            Url = "";
+            url = "";
         }
     }
 
@@ -59,6 +67,19 @@ namespace RedditSlideshow
         private void generateSlideShow_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+
+        private void textBoxLostFocusEventHandler(object sender, RoutedEventArgs e)
+        {
+            TextBox textbox = sender as TextBox;
+
+            string text = textbox.Text;
+
+            // Auto format entry to compatible format..
+
+
+            textbox.GetBindingExpression(TextBox.TextProperty).UpdateSource();
         }
     }
 }

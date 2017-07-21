@@ -11,10 +11,6 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Style/MainPageStyle.xaml" />
-                <ResourceDictionary>
-                    <local:ObservableBooleanConverter x:Key="booleanconverter"/>
-                </ResourceDictionary>
-
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Page.Resources>
@@ -43,7 +39,7 @@
                     <ListView.ItemTemplate>
                         <DataTemplate x:DataType="local:Link">
                             <StackPanel Orientation="Horizontal">
-                                <TextBox Name="text" Text="{x:Bind Url, Mode=TwoWay}" MinWidth="300" TextWrapping="Wrap" />
+                                <TextBox Name="text" Text="{Binding Url, Mode=TwoWay}" MinWidth="300" TextWrapping="Wrap" LostFocus="textBoxLostFocusEventHandler"/>
                                 <Button  Click="removeLink_Click" HorizontalAlignment="Center">
                                     <SymbolIcon Symbol="Delete"/>
                                 </Button>
