@@ -83,4 +83,13 @@
         <Setter Property="Foreground" Value="{StaticResource MainTheme_color_bright}" />
     </Style>
 
+    <Style x:Key="SlideshowContentTitle"
+           TargetType="TextBlock">
+        <Setter Property="FontSize" Value="20"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="VerticalAlignment" Value="Bottom" />
+        <Setter Property="Margin" Value="0,0,0,100"/>
+        <Setter Property="Foreground" Value="{StaticResource MainTheme_color_bright}"/>
+    </Style>
+
 </ResourceDictionary>

@@ -36,6 +36,9 @@
         <Button Style="{StaticResource NavigationButtonRight}" />
 
 
+        <TextBlock Text="Title" Style="{StaticResource SlideshowContentTitle}" Visibility="{Binding ElementName=TitleIsVisibleCheckbox, Path=IsChecked}" Name="SlideshowImageTitle"/>
+
+
         <Grid VerticalAlignment="Bottom" Name="MenuContentGrid">
 
             
@@ -66,7 +69,6 @@
                 </Storyboard>
             </Grid.Resources>
 
-
             <Button
                 Style="{StaticResource NavigationButtonMore}"
                 Grid.Row="0" Click="ViewMoreButtonClick" />
@@ -74,6 +76,7 @@
 
             <Grid Style="{StaticResource MenuContentInnerGridStyle}" Grid.Row="1">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
@@ -98,19 +101,24 @@
                     <CheckBox Style="{StaticResource MenuPopupContentCheckbox}" Name="AutoForwardEnabledCheckbox"></CheckBox>
                 </StackPanel>
 
-                <Button Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Background="{StaticResource MainTheme_color_highlight}"
+                <StackPanel Grid.Row="3" Style="{StaticResource MenuPopupContentStackPanelStyle}">
+                    <TextBlock Style="{StaticResource MenuPopupContentTextBlockStyle}">Show Title:</TextBlock>
+                    <CheckBox Style="{StaticResource MenuPopupContentCheckbox}" Name="TitleIsVisibleCheckbox"></CheckBox>
+                </StackPanel>
+
+                <Button Grid.Row="4" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Background="{StaticResource MainTheme_color_highlight}"
                         Click="GoBackButtonClick">
                     Back to Selection Screen
                 </Button>
                 
                 
-                <Rectangle Grid.Row="4" x:Name="BlurMask" Fill="Transparent" 
+                <Rectangle Grid.Row="5" x:Name="BlurMask" Fill="Transparent" 
                        HorizontalAlignment="Stretch" 
                        VerticalAlignment="Stretch" Height="100">
                 </Rectangle>
 
 
-                <ScrollViewer Grid.Row="4" HorizontalAlignment="Center">
+                <ScrollViewer Grid.Row="5" HorizontalAlignment="Center">
                     <GridView  Name="DisplayGrid">
                     </GridView>
 
