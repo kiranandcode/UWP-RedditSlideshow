@@ -5,10 +5,109 @@
     xmlns:local="using:RedditSlideshow.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:Xaml="using:Microsoft.Graphics.Canvas.UI.Xaml"
+    xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
+    xmlns:behaviors="using:Microsoft.Toolkit.Uwp.UI.Animations.Behaviors"
     mc:Ignorable="d">
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <TextBlock
-            Text="Hello!"/>
+
+    <Grid Background="{StaticResource MainTheme_color_accent}">
+        <Image Name="MainSlideshowImage" Source="/Assets/LockScreenLogo.scale-200.png" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="Uniform">
+            <interactivity:Interaction.Behaviors>
+                <behaviors:Blur 
+                    x:Name="ImageBackgroundBlur"
+                    AutomaticallyStart="False"
+                    Value="10"
+                    Delay="0"
+                    Duration="1000"/>
+            </interactivity:Interaction.Behaviors>
+        </Image>
+
+        <Button VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="{x:Null}" Background="{x:Null}" Click="ViewMoreButtonClick" >
+            <SymbolIcon Symbol="Back" Foreground="White" />
+        </Button>
+
+        <Button VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="{x:Null}" Background="{x:Null}" Click="ViewMoreButtonClick" >
+            <SymbolIcon Symbol="Forward" Foreground="White" />
+        </Button>
+
+
+        <Grid VerticalAlignment="Bottom" Name="MenuContentGrid">
+
+            
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*" x:Name="ContentRow"/>
+            </Grid.RowDefinitions>
+
+            <Grid.RenderTransform>
+                <TranslateTransform x:Name="DisplayGridTransform" Y="{Binding ElementName=ContentRow, Path=ActualHeight}">
+                </TranslateTransform>
+            </Grid.RenderTransform>
+
+            <Grid.Resources>
+                <Storyboard x:Name="menuDisplayStoryboardOpen">
+                    <DoubleAnimation
+                        Storyboard.TargetName="DisplayGridTransform"
+                        Storyboard.TargetProperty="Y"
+                        To="1" Duration="0:0:1"
+                       />
+                </Storyboard>
+                <Storyboard x:Name="menuDisplayStoryboardClose">
+                    <DoubleAnimation
+                        Storyboard.TargetName="DisplayGridTransform"
+                        Storyboard.TargetProperty="Y"
+                        From="1" Duration="0:0:1"
+                        />
+                </Storyboard>
+            </Grid.Resources>
+
+
+            <Button Grid.Row="0" VerticalAlignment="Bottom" HorizontalAlignment="Center" Foreground="{x:Null}" Background="{x:Null}" Click="ViewMoreButtonClick" >
+                <SymbolIcon Symbol="More" Foreground="White" />
+            </Button>
+
+            
+            <Grid Background="Black" Opacity="0.5" Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                
+                
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <TextBlock Margin="10,10,10,10" Foreground="{StaticResource MainTheme_color_bright}">Image Url: </TextBlock>
+                    <TextBlock Foreground="{StaticResource MainTheme_color_bright}" Name="CurrentImageUrl"></TextBlock>
+                </StackPanel>
+
+
+                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <TextBlock Margin="10,10,10,10" Foreground="{StaticResource MainTheme_color_bright}">Auto-Forward Delay Time(s): </TextBlock>
+                    <TextBox Margin="10,10,10,10" Width="200" Name="AutoForwardDelayTimeTextBox" Foreground="{StaticResource MainTheme_color_bright}"></TextBox>
+                </StackPanel>
+
+                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <TextBlock Margin="10,10,10,10" Foreground="{StaticResource MainTheme_color_bright}">Auto-Forward Enabled: </TextBlock>
+                    <CheckBox Margin="10,10,10,10" Foreground="{StaticResource MainTheme_color_bright}" Name="AutoForwardEnabledCheckbox"></CheckBox>
+                </StackPanel>
+                
+                
+                <Rectangle Grid.Row="3" x:Name="BlurMask" Fill="White" 
+                       HorizontalAlignment="Stretch" 
+                       VerticalAlignment="Stretch" Height="100">
+                </Rectangle>
+
+
+                <ScrollViewer Grid.Row="3" HorizontalAlignment="Center">
+                    <GridView  Name="DisplayGrid">
+                    </GridView>
+
+                </ScrollViewer>
+
+            </Grid>
+        </Grid>
+
     </Grid>
 </Page>
