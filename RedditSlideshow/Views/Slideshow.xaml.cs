@@ -30,6 +30,7 @@ namespace RedditSlideshow.Views
     /// </summary>
     public sealed partial class Slideshow : Page
     {
+        
         Boolean MenuExtended = false;
 
         public Slideshow()
@@ -61,6 +62,22 @@ namespace RedditSlideshow.Views
             MenuExtended = !MenuExtended;
 
            
+        }
+
+        private void GoBackButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (this.Frame.CanGoBack)
+            {
+                // Deallocate resources.
+                this.Frame.GoBack();
+            }
+        }
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+
+            List<string> urls = e.Parameter as List<string>;
         }
     }
 }

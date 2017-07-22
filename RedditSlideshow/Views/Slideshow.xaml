@@ -10,26 +10,30 @@
     xmlns:behaviors="using:Microsoft.Toolkit.Uwp.UI.Animations.Behaviors"
     mc:Ignorable="d">
 
+    <Page.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Style/SlideshowStyle.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Page.Resources>
+    
 
     <Grid Background="{StaticResource MainTheme_color_accent}">
-        <Image Name="MainSlideshowImage" Source="/Assets/LockScreenLogo.scale-200.png" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="Uniform">
+        <Image Name="MainSlideshowImage" Source="/Assets/exampleImage.jpg" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="Uniform">
             <interactivity:Interaction.Behaviors>
                 <behaviors:Blur 
                     x:Name="ImageBackgroundBlur"
                     AutomaticallyStart="False"
                     Value="10"
                     Delay="0"
-                    Duration="1000"/>
+                    Duration="500"/>
             </interactivity:Interaction.Behaviors>
         </Image>
 
-        <Button VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="{x:Null}" Background="{x:Null}" Click="ViewMoreButtonClick" >
-            <SymbolIcon Symbol="Back" Foreground="White" />
-        </Button>
+        <Button Style="{StaticResource NavigationButtonLeft}" />
 
-        <Button VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="{x:Null}" Background="{x:Null}" Click="ViewMoreButtonClick" >
-            <SymbolIcon Symbol="Forward" Foreground="White" />
-        </Button>
+        <Button Style="{StaticResource NavigationButtonRight}" />
 
 
         <Grid VerticalAlignment="Bottom" Name="MenuContentGrid">
@@ -50,57 +54,63 @@
                     <DoubleAnimation
                         Storyboard.TargetName="DisplayGridTransform"
                         Storyboard.TargetProperty="Y"
-                        To="1" Duration="0:0:1"
+                        To="1" Duration="0:0:.5"
                        />
                 </Storyboard>
                 <Storyboard x:Name="menuDisplayStoryboardClose">
                     <DoubleAnimation
                         Storyboard.TargetName="DisplayGridTransform"
                         Storyboard.TargetProperty="Y"
-                        From="1" Duration="0:0:1"
+                        From="1" Duration="0:0:.5"
                         />
                 </Storyboard>
             </Grid.Resources>
 
 
-            <Button Grid.Row="0" VerticalAlignment="Bottom" HorizontalAlignment="Center" Foreground="{x:Null}" Background="{x:Null}" Click="ViewMoreButtonClick" >
-                <SymbolIcon Symbol="More" Foreground="White" />
-            </Button>
+            <Button
+                Style="{StaticResource NavigationButtonMore}"
+                Grid.Row="0" Click="ViewMoreButtonClick" />
 
-            
-            <Grid Background="Black" Opacity="0.5" Grid.Row="1">
+
+            <Grid Style="{StaticResource MenuContentInnerGridStyle}" Grid.Row="1">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                
-                
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <TextBlock Margin="10,10,10,10" Foreground="{StaticResource MainTheme_color_bright}">Image Url: </TextBlock>
+
+
+                <StackPanel  Style="{StaticResource MenuPopupContentStackPanelStyle}">
+                    <TextBlock Style="{StaticResource MenuPopupContentTextBlockStyle}">Image Url: </TextBlock>
                     <TextBlock Foreground="{StaticResource MainTheme_color_bright}" Name="CurrentImageUrl"></TextBlock>
                 </StackPanel>
 
 
-                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
-                    <TextBlock Margin="10,10,10,10" Foreground="{StaticResource MainTheme_color_bright}">Auto-Forward Delay Time(s): </TextBlock>
-                    <TextBox Margin="10,10,10,10" Width="200" Name="AutoForwardDelayTimeTextBox" Foreground="{StaticResource MainTheme_color_bright}"></TextBox>
+                <StackPanel Grid.Row="1" Style="{StaticResource MenuPopupContentStackPanelStyle}">
+                    <TextBlock Style="{StaticResource MenuPopupContentTextBlockStyle}">Auto-Forward Delay Time(s): </TextBlock>
+                    <TextBox Style="{StaticResource MenuPopupContentTextBoxStyle}" Name="AutoForwardDelayTimeTextBox"></TextBox>
                 </StackPanel>
 
-                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
-                    <TextBlock Margin="10,10,10,10" Foreground="{StaticResource MainTheme_color_bright}">Auto-Forward Enabled: </TextBlock>
-                    <CheckBox Margin="10,10,10,10" Foreground="{StaticResource MainTheme_color_bright}" Name="AutoForwardEnabledCheckbox"></CheckBox>
+                <StackPanel Grid.Row="2" Style="{StaticResource MenuPopupContentStackPanelStyle}">
+                    <TextBlock Style="{StaticResource MenuPopupContentTextBlockStyle}">Auto-Forward Enabled: </TextBlock>
+                    <CheckBox Style="{StaticResource MenuPopupContentCheckbox}" Name="AutoForwardEnabledCheckbox"></CheckBox>
                 </StackPanel>
+
+                <Button Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Background="{StaticResource MainTheme_color_highlight}"
+                        Click="GoBackButtonClick">
+                    Back to Selection Screen
+                </Button>
                 
                 
-                <Rectangle Grid.Row="3" x:Name="BlurMask" Fill="White" 
+                <Rectangle Grid.Row="4" x:Name="BlurMask" Fill="Transparent" 
                        HorizontalAlignment="Stretch" 
                        VerticalAlignment="Stretch" Height="100">
                 </Rectangle>
 
 
-                <ScrollViewer Grid.Row="3" HorizontalAlignment="Center">
+                <ScrollViewer Grid.Row="4" HorizontalAlignment="Center">
                     <GridView  Name="DisplayGrid">
                     </GridView>
 

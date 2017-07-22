@@ -1,0 +1,86 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:RedditSlideshow.Style">
+
+    <Style 
+        x:Key="NavigationButtonLeft" 
+        TargetType="Button">
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+        <Setter Property="Foreground" Value="{x:Null}"/>
+        <Setter Property="Background" Value="{x:Null}"/>
+        <Setter Property="Content">
+            <Setter.Value>
+                <SymbolIcon Symbol="Back" Foreground="White"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+
+    <Style 
+        x:Key="NavigationButtonRight" 
+        TargetType="Button">
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="HorizontalAlignment" Value="Right"/>
+        <Setter Property="Foreground" Value="{x:Null}"/>
+        <Setter Property="Background" Value="{x:Null}"/>
+        <Setter Property="Content">
+            <Setter.Value>
+                <SymbolIcon Symbol="Forward" Foreground="White"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style 
+        x:Key="NavigationButtonMore" 
+        TargetType="Button">
+        <Setter Property="VerticalAlignment" Value="Bottom"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="Foreground" Value="{x:Null}"/>
+        <Setter Property="Background" Value="{x:Null}"/>
+        <Setter Property="Content">
+            <Setter.Value>
+                <SymbolIcon Symbol="More" Foreground="White"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="MenuContentInnerGridStyle"
+           TargetType="Grid">
+        <Setter Property="Background" Value="{StaticResource MainTheme_color_highlight}" />
+        <Setter Property="Opacity" Value="0.6" />
+    </Style>
+
+
+    <Style x:Key="MenuPopupContentStackPanelStyle"
+           TargetType="StackPanel">
+        <Setter Property="Orientation" Value="Horizontal"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+    </Style>
+
+    <Style x:Key="MenuPopupContentTextBlockStyle"
+           TargetType="TextBlock">
+        <Setter Property="Margin" Value="10,10,10,10"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Foreground" Value="{StaticResource MainTheme_color_bright}" />
+    </Style>
+
+    
+    <Style x:Key="MenuPopupContentTextBoxStyle"
+           TargetType="TextBox">
+        <Setter Property="Margin" Value="10,10,10,10"/>
+        <Setter Property="Width" Value="200" />
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Foreground" Value="{StaticResource MainTheme_color_bright}" />
+    </Style>
+
+    <Style x:Key="MenuPopupContentCheckbox"
+            TargetType="CheckBox">
+        <Setter Property="Margin" Value="10,10,10,10"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="Foreground" Value="{StaticResource MainTheme_color_bright}" />
+    </Style>
+
+</ResourceDictionary>

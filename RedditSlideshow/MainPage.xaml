@@ -38,7 +38,7 @@
                 <ListView Name="LinkListView" ItemsSource="{x:Bind LinkList}" HorizontalAlignment="Center" HorizontalContentAlignment="Stretch" >
                     <ListView.ItemTemplate>
                         <DataTemplate x:DataType="local:Link">
-                            <StackPanel Orientation="Horizontal">
+                            <StackPanel Orientation="Horizontal" Margin="10,10,10,10">
                                 <TextBox Name="text" Text="{Binding Url, Mode=TwoWay}" MinWidth="300" TextWrapping="Wrap" LostFocus="textBoxLostFocusEventHandler"/>
                                 <Button  Click="removeLink_Click" HorizontalAlignment="Center">
                                     <SymbolIcon Symbol="Delete"/>
@@ -50,7 +50,7 @@
                 
                 
 
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
                     <Button Click="addLink_Click">
                         <SymbolIcon Symbol="Add" />
                     </Button>
