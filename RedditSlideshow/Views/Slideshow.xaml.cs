@@ -19,6 +19,10 @@ using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Hosting;
 using Windows.UI.Composition;
 using Microsoft.Graphics.Canvas.Effects;
+using System.Net.Http;
+using RedditSlideshow.Models;
+using Newtonsoft.Json;
+using System.Text.RegularExpressions;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -32,9 +36,11 @@ namespace RedditSlideshow.Views
     {
         
         Boolean MenuExtended = false;
+        MediaUrlList medialist;
 
         public Slideshow()
         {
+            medialist = new MediaUrlList();
             this.InitializeComponent();
 
      
@@ -78,21 +84,52 @@ namespace RedditSlideshow.Views
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-
-            List<>
             List<string> urls = e.Parameter as List<string>;
-            urls.Select(str => "https://www.reddit.com/r/" + str + ".json").Select(link =>
+            GenerateImages(urls).ContinueWith((result) => { foreach (MediaUrl obj in result.Result) { medialist.Add(obj); obj.RetrieveContent(); } });
+
+        }
+
+        private static async Task<List<MediaUrl>> GenerateImages(List<string> urls)
+        {
+            // Regex for checking image items
+            Regex image_expr = new Regex(@".(?:jpg|jpeg|png|bmp|gif|gifv)$");
+
+            List<MediaUrl> list = new List<MediaUrl>();
+            using (HttpClient client = new HttpClient())
             {
+                
+                IEnumerable<string> full_uris = urls.Select(str => "https://www.reddit.com/" + str + ".json?limit=100");
+                foreach (string link in full_uris)
+                {
+                    HttpResponseMessage response = await client.GetAsync(link);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string result = await response.Content.ReadAsStringAsync();
+                        var rootResult = JsonConvert.DeserializeObject<Rootobject>(result);
+                        foreach(var child in rootResult.data.children)
+                        {
+                            if(image_expr.IsMatch(child.data.url))
+                            {
+                                string url = child.data.url;
+                                string thumb_url = url;
+                                if(!String.IsNullOrEmpty(child.data.thumbnail))
+                                {
+                                    thumb_url = child.data.thumbnail;
+                                }
+                                MediaUrl media_obj = new MediaUrl(child.data.title, url, thumb_url);
+                                list.Add(media_obj);
+                            }
+                        }
 
+                    }
+                }
+            }
+            return list;
+        }
 
-                // For each url, retrieve a list of links using Newton
-
-
-
-
-                return link;
-            }); ;
-
+        static string UriToString(Uri uri)
+        {
+            return uri.ToString();
         }
     }
 }

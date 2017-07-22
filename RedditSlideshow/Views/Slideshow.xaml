@@ -3,11 +3,13 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:RedditSlideshow.Views"
+    xmlns:models="using:RedditSlideshow.Models"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:Xaml="using:Microsoft.Graphics.Canvas.UI.Xaml"
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     xmlns:behaviors="using:Microsoft.Toolkit.Uwp.UI.Animations.Behaviors"
+    xmlns:controls="using:RedditSlideshow.Controls"
     mc:Ignorable="d">
 
     <Page.Resources>
@@ -128,8 +130,13 @@
                 </Rectangle>
 
 
-                <ScrollViewer Grid.Row="2" HorizontalAlignment="Center">
-                    <GridView  Name="DisplayGrid">
+                <ScrollViewer Grid.Row="2" HorizontalAlignment="Center" Height="200">
+                    <GridView  Name="DisplayGrid" ItemsSource="{x:Bind medialist}">
+                        <GridView.ItemTemplate>
+                            <DataTemplate x:DataType="models:MediaUrl">
+                                <controls:ImageView Thumb="{x:Bind Image_Thumb_Uri}" Title="{x:Bind Title}" />
+                            </DataTemplate>
+                        </GridView.ItemTemplate>
                     </GridView>
 
                 </ScrollViewer>
