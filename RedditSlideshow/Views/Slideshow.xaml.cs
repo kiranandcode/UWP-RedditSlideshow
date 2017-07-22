@@ -40,6 +40,8 @@ namespace RedditSlideshow.Views
      
         }
 
+        
+
         private void ViewMoreButtonClick(object sender, RoutedEventArgs e)
         {
             if(!MenuExtended)
@@ -77,7 +79,20 @@ namespace RedditSlideshow.Views
         {
             base.OnNavigatedTo(e);
 
+            List<>
             List<string> urls = e.Parameter as List<string>;
+            urls.Select(str => "https://www.reddit.com/r/" + str + ".json").Select(link =>
+            {
+
+
+                // For each url, retrieve a list of links using Newton
+
+
+
+
+                return link;
+            }); ;
+
         }
     }
 }

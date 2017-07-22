@@ -99,6 +99,7 @@
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Models\RedditJsonModel.cs" />
+    <Compile Include="Models\UtilityModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Views\Slideshow.xaml.cs">
       <DependentUpon>Slideshow.xaml</DependentUpon>
