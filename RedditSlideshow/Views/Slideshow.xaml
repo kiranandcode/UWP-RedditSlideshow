@@ -20,6 +20,7 @@
     
 
     <Grid Background="{StaticResource MainTheme_color_accent}">
+        <MediaElement Name="MainSlideshowVideo" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
         <Image Name="MainSlideshowImage" Source="/Assets/exampleImage.jpg" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="Uniform">
             <interactivity:Interaction.Behaviors>
                 <behaviors:Blur 
@@ -78,47 +79,56 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
+                
+                <Grid HorizontalAlignment="Center">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
 
-                <StackPanel  Style="{StaticResource MenuPopupContentStackPanelStyle}">
-                    <TextBlock Style="{StaticResource MenuPopupContentTextBlockStyle}">Image Url: </TextBlock>
-                    <TextBlock Foreground="{StaticResource MainTheme_color_bright}" Name="CurrentImageUrl"></TextBlock>
-                </StackPanel>
+                        <TextBlock Style="{StaticResource MenuPopupContentTextBlockStyle}">Image Url:</TextBlock>
+                        <TextBlock Grid.Column="1" Foreground="{StaticResource MainTheme_color_bright}" Name="CurrentImageUrl"></TextBlock>
 
 
-                <StackPanel Grid.Row="1" Style="{StaticResource MenuPopupContentStackPanelStyle}">
-                    <TextBlock Style="{StaticResource MenuPopupContentTextBlockStyle}">Auto-Forward Delay Time(s): </TextBlock>
-                    <TextBox Style="{StaticResource MenuPopupContentTextBoxStyle}" Name="AutoForwardDelayTimeTextBox"></TextBox>
-                </StackPanel>
+                        <TextBlock  Grid.Row="1" Style="{StaticResource MenuPopupContentTextBlockStyle}">Auto-Forward Delay Time(s):</TextBlock>
+                    <TextBox  Grid.Column="1" Grid.Row="1" Style="{StaticResource MenuPopupContentTextBoxStyle}" Name="AutoForwardDelayTimeTextBox"></TextBox>
 
-                <StackPanel Grid.Row="2" Style="{StaticResource MenuPopupContentStackPanelStyle}">
-                    <TextBlock Style="{StaticResource MenuPopupContentTextBlockStyle}">Auto-Forward Enabled: </TextBlock>
-                    <CheckBox Style="{StaticResource MenuPopupContentCheckbox}" Name="AutoForwardEnabledCheckbox"></CheckBox>
-                </StackPanel>
 
-                <StackPanel Grid.Row="3" Style="{StaticResource MenuPopupContentStackPanelStyle}">
-                    <TextBlock Style="{StaticResource MenuPopupContentTextBlockStyle}">Show Title:</TextBlock>
-                    <CheckBox Style="{StaticResource MenuPopupContentCheckbox}" Name="TitleIsVisibleCheckbox"></CheckBox>
-                </StackPanel>
+                        <TextBlock Grid.Row="2" Style="{StaticResource MenuPopupContentTextBlockStyle}">Auto-Forward Enabled:</TextBlock>
+                    <CheckBox Grid.Column="1" Grid.Row="2" Style="{StaticResource MenuPopupContentCheckbox}" Name="AutoForwardEnabledCheckbox"></CheckBox>
 
-                <Button Grid.Row="4" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Background="{StaticResource MainTheme_color_highlight}"
+                        <TextBlock Grid.Row="3" Style="{StaticResource MenuPopupContentTextBlockStyle}">Show Title:</TextBlock>
+                    <CheckBox Grid.Column="1" Grid.Row="3" Style="{StaticResource MenuPopupContentCheckbox}" Name="TitleIsVisibleCheckbox"></CheckBox>
+
+                </Grid>
+
+
+
+
+
+
+                <Button Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" Background="{StaticResource MainTheme_color_highlight}"
                         Click="GoBackButtonClick">
                     Back to Selection Screen
                 </Button>
                 
                 
-                <Rectangle Grid.Row="5" x:Name="BlurMask" Fill="Transparent" 
+                <Rectangle Grid.Row="2" x:Name="BlurMask" Fill="Transparent" 
                        HorizontalAlignment="Stretch" 
                        VerticalAlignment="Stretch" Height="100">
                 </Rectangle>
 
 
-                <ScrollViewer Grid.Row="5" HorizontalAlignment="Center">
+                <ScrollViewer Grid.Row="2" HorizontalAlignment="Center">
                     <GridView  Name="DisplayGrid">
                     </GridView>
 

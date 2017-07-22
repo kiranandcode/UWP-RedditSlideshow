@@ -63,6 +63,7 @@
            TargetType="TextBlock">
         <Setter Property="Margin" Value="10,10,10,10"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="HorizontalAlignment" Value="Right"/>
         <Setter Property="Foreground" Value="{StaticResource MainTheme_color_bright}" />
     </Style>
 
@@ -79,7 +80,7 @@
             TargetType="CheckBox">
         <Setter Property="Margin" Value="10,10,10,10"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
-        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
         <Setter Property="Foreground" Value="{StaticResource MainTheme_color_bright}" />
     </Style>
 
