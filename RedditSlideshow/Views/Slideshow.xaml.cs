@@ -24,6 +24,9 @@ using RedditSlideshow.Models;
 using Newtonsoft.Json;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
+using Windows.ApplicationModel.Background;
+using System.Threading;
+using Windows.System.Threading;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -63,6 +66,7 @@ namespace RedditSlideshow.Views
     /// </summary>
     public sealed partial class Slideshow : Page
     {
+        ThreadPoolTimer autoforwardTimer;
         
         Boolean MenuExtended = false;
         MediaUrlList medialist;
@@ -129,6 +133,7 @@ namespace RedditSlideshow.Views
             if (this.Frame.CanGoBack)
             {
                 // Deallocate resources.
+                if(autoforwardTimer != null) autoforwardTimer.Cancel();
                 this.Frame.GoBack();
             }
         }
@@ -137,12 +142,22 @@ namespace RedditSlideshow.Views
         {
             base.OnNavigatedTo(e);
             List<string> urls = e.Parameter as List<string>;
-            GenerateImages(urls).ContinueWith((result) => { foreach (MediaUrl obj in result.Result) {
+           
+                GenerateImages(urls).ContinueWith((result) =>
+                {
+                    foreach (MediaUrl obj in result.Result)
+                    {
 
-                    medialist.Add(obj);
+                        medialist.Add(obj);
 
-                };
-            });
+                    };
+                    if(result.Result.Count == 0)
+                    {
+                        // No Urls retrieved, show error, return to sender.
+                        Debug.WriteLine("No Urls Retrieved");
+                    }
+                });
+             
 
 
 
@@ -164,28 +179,35 @@ namespace RedditSlideshow.Views
                     HttpResponseMessage response = await client.GetAsync(link);
                     if (response.IsSuccessStatusCode)
                     {
-                        string result = await response.Content.ReadAsStringAsync();
-                        var rootResult = JsonConvert.DeserializeObject<Rootobject>(result);
-                        foreach(var child in rootResult.data.children)
+                        try
                         {
-                            if(image_expr.IsMatch(child.data.url))
+                            string result = await response.Content.ReadAsStringAsync();
+                            var rootResult = JsonConvert.DeserializeObject<Rootobject>(result);
+                            foreach (var child in rootResult.data.children)
                             {
-                                string url;
-                                if (gifv_expr.IsMatch(child.data.url))
+                                if (image_expr.IsMatch(child.data.url))
                                 {
-                                    url = child.data.url.Substring(0, child.data.url.LastIndexOf('v'));
-                                    Debug.WriteLine("Changing " + child.data.url + " -> " + url);
-                                } else
-                                    url = child.data.url;
-                                string thumb_url = url;
-                                string self_url = "www.reddit.com" + child.data.permalink;
-                                if(!String.IsNullOrEmpty(child.data.thumbnail))
-                                {
-                                    thumb_url = child.data.thumbnail;
+                                    string url;
+                                    if (gifv_expr.IsMatch(child.data.url))
+                                    {
+                                        url = child.data.url.Substring(0, child.data.url.LastIndexOf('v'));
+                                        Debug.WriteLine("Changing " + child.data.url + " -> " + url);
+                                    }
+                                    else
+                                        url = child.data.url;
+                                    string thumb_url = url;
+                                    string self_url = "www.reddit.com" + child.data.permalink;
+                                    if (!String.IsNullOrEmpty(child.data.thumbnail))
+                                    {
+                                        thumb_url = child.data.thumbnail;
+                                    }
+                                    MediaUrl media_obj = new MediaUrl(child.data.title, url, thumb_url, self_url);
+                                    list.Add(media_obj);
                                 }
-                                MediaUrl media_obj = new MediaUrl(child.data.title, url, thumb_url, self_url);
-                                list.Add(media_obj);
                             }
+                        } catch (UriFormatException e)
+                        {
+                            Debug.WriteLine(e);
                         }
 
                     }
@@ -197,6 +219,60 @@ namespace RedditSlideshow.Views
         static string UriToString(Uri uri)
         {
             return uri.ToString();
+        }
+
+        private void TextboxNumeralsOnly(TextBox sender, TextBoxTextChangingEventArgs args)
+        {
+            sender.Text = new String(sender.Text.Where((char x) =>
+            {
+                if (Char.IsDigit(x))
+                    return true;
+                else
+                    return false;
+            }).ToArray());
+        }
+
+
+
+        private void configureAutoTask(Boolean enable, int period)
+        {
+            if (enable)
+            {
+                if (autoforwardTimer != null) autoforwardTimer.Cancel();
+                
+                autoforwardTimer = ThreadPoolTimer.CreatePeriodicTimer((source) => {
+                    
+                    Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                    {
+                        medialist.incrementPosition();
+                    });
+
+                }, TimeSpan.FromSeconds(period));
+                Debug.WriteLine(autoforwardTimer.ToString());
+
+            }
+            else
+            {
+                if (autoforwardTimer != null) autoforwardTimer.Cancel();
+
+            }
+        }
+
+        private void enableAutoForward(object sender, RoutedEventArgs e)
+        {
+            CheckBox checkbox = sender as CheckBox;
+            int period;
+
+            if (!Int32.TryParse(AutoForwardDelayTimeTextBox.Text, out period)) period = 5;
+            configureAutoTask(checkbox.IsChecked ?? false, period);
+        }
+
+        private void timingChanged(object sender, RoutedEventArgs e)
+        {
+            int period;
+
+            if (!Int32.TryParse(AutoForwardDelayTimeTextBox.Text, out period)) period = 5;
+            configureAutoTask(AutoForwardEnabledCheckbox.IsChecked ?? false, period);
         }
     }
 }
