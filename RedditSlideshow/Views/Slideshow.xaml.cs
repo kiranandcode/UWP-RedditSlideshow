@@ -28,6 +28,8 @@ using Windows.ApplicationModel.Background;
 using System.Threading;
 using Windows.System.Threading;
 using RedditSlideshow.Controls;
+using Windows.Storage;
+using Windows.Graphics.Imaging;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -310,5 +312,50 @@ namespace RedditSlideshow.Views
             MediaUrl url = view.DataContext as MediaUrl;
             medialist.setPosition(url.Index);
         }
+
+        private async void downloadImageAsync(object sender, RoutedEventArgs e)
+        {
+            WriteableBitmap img_to_save = medialist.Url.WritableImage;
+            String filename = medialist.Url.Image_Uri.Segments.Last();
+            Debug.WriteLine(filename);
+            StorageFile x = await KnownFolders.PicturesLibrary.CreateFileAsync(filename, CreationCollisionOption.GenerateUniqueName);
+            using (IRandomAccessStream stream = await x.OpenAsync(FileAccessMode.ReadWrite))
+            {
+                Guid id;
+                // jpg|jpeg|png|bmp|gif|gifv
+                // Figure out the type of the image.
+                if (filename.EndsWith(".jpeg") || filename.EndsWith(".jpg"))
+                {
+                    id = BitmapEncoder.JpegEncoderId;
+                }
+                else if (filename.EndsWith(".png"))
+                {
+                    id = BitmapEncoder.PngEncoderId;
+                }
+                else if (filename.EndsWith(".bmp"))
+                {
+                    id = BitmapEncoder.BmpEncoderId;
+                }
+                else if (filename.EndsWith(".gif"))
+                {
+                    id = BitmapEncoder.GifEncoderId;
+                }
+                else return;
+
+
+                BitmapEncoder encoder = await BitmapEncoder.CreateAsync(id, stream);
+                Stream pixelStream = img_to_save.PixelBuffer.AsStream();
+                byte[] pixels = new byte[pixelStream.Length];
+                await pixelStream.ReadAsync(pixels, 0, pixels.Length);
+
+                encoder.SetPixelData(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Ignore, (uint)img_to_save.PixelWidth, (uint)img_to_save.PixelHeight, 96.0, 96.0, pixels);
+
+                await encoder.FlushAsync();
+            }
+            
+
+        }
+
+
     }
 }

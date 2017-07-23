@@ -68,7 +68,7 @@ namespace RedditSlideshow.Models {
                 {
 
                     // To prevent memory overflows, delete the prior images if too much memory is in use
-                    if (MemoryManager.AppMemoryUsage > 500000000)
+                    if (MemoryManager.AppMemoryUsage > 500000000 && base.Count > 5)
                     {
                         MediaUrl prior = base[(Index > 1 ? Index - 2 : base.Count + Index - 2)];
                         prior.clearMemoryAsync();
@@ -162,6 +162,7 @@ namespace RedditSlideshow.Models {
         public string Self { get; set; }
 
         public BitmapImage Image { get; set; }
+        public WriteableBitmap WritableImage { get; set; }
 
         public String Title { get; set; }
 
@@ -185,6 +186,8 @@ namespace RedditSlideshow.Models {
             await retrievingContent.WaitAsync();
 
             Image = null;
+            WritableImage = null;
+
             image_retrieved = false;
             retrievingContent.Release();
 
@@ -228,6 +231,12 @@ namespace RedditSlideshow.Models {
                     {
                         Image = new BitmapImage();
                         Image.SetSource(randomAccessStream);
+
+                        // Reset the stream pos
+                        randomAccessStream.Seek(0);
+                        WritableImage = new WriteableBitmap(Image.PixelWidth, Image.PixelHeight);
+                        WritableImage.SetSource(randomAccessStream);
+
                         randomAccessStream.Dispose();
                         Image_retrieved = true;
                     });
