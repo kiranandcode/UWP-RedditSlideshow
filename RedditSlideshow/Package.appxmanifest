@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" IgnorableNamespaces="uap mp">
-  <Identity Name="bec7ee63-4f68-43e6-8f82-ce968e866f52" Publisher="CN=gopia" Version="1.0.0.0" />
-  <mp:PhoneIdentity PhoneProductId="bec7ee63-4f68-43e6-8f82-ce968e866f52" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
+  <Identity Name="52635Gopiandcode.RedditSlideshow" Publisher="CN=FF2E1B6B-D985-47AB-A8B9-DB4AC3E6320A" Version="1.1.3.0" />
+  <mp:PhoneIdentity PhoneProductId="d646d67e-47f4-4fb2-be02-dd7613c2d7bb" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
-    <DisplayName>RedditSlideshow</DisplayName>
-    <PublisherDisplayName>GopiandCode</PublisherDisplayName>
+    <DisplayName>Reddit Slideshow</DisplayName>
+    <PublisherDisplayName>Gopiandcode</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
   <Dependencies>
@@ -15,7 +15,7 @@
   </Resources>
   <Applications>
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="RedditSlideshow.App">
-      <uap:VisualElements DisplayName="RedditSlideshow" Square150x150Logo="Assets\Square150x150.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="RedditSlideshow" BackgroundColor="#2d2d86">
+      <uap:VisualElements DisplayName="Reddit Slideshow" Square150x150Logo="Assets\Square150x150.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="Generates slideshows from Images from Reddit Urls. Has limited support for gifs." BackgroundColor="#2d2d86">
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" ShortName="Reddit Slideshow" Square71x71Logo="Assets\Square71x71Logo.png">
           <uap:ShowNameOnTiles>
             <uap:ShowOn Tile="square150x150Logo" />
@@ -23,6 +23,12 @@
           </uap:ShowNameOnTiles>
         </uap:DefaultTile>
         <uap:SplashScreen Image="Assets\SplashScreen.png" BackgroundColor="#2d2d86" />
+        <uap:InitialRotationPreference>
+          <uap:Rotation Preference="portrait" />
+          <uap:Rotation Preference="landscape" />
+          <uap:Rotation Preference="portraitFlipped" />
+          <uap:Rotation Preference="landscapeFlipped" />
+        </uap:InitialRotationPreference>
       </uap:VisualElements>
     </Application>
   </Applications>

@@ -47,7 +47,7 @@ namespace RedditSlideshow
 
     public sealed partial class MainPage : Page
     {
-        
+        static ContentDialog err_dialog;
         public ObservableCollection<Link> LinkList;
 
         public MainPage()
@@ -131,6 +131,7 @@ namespace RedditSlideshow
 
         private static void ShowMessageDialog(string title, string content)
         {
+            if (err_dialog != null) return;
 
             var dialog = new ContentDialog() {
                 Title = title,
@@ -149,7 +150,11 @@ namespace RedditSlideshow
             dialog.Content = panel;
 
             dialog.PrimaryButtonText = "Ok";
-
+            dialog.PrimaryButtonClick += (s, e) =>
+            {
+                err_dialog = null;
+            };
+            err_dialog = dialog;
 
             dialog.ShowAsync();
         }
