@@ -23,12 +23,41 @@ using System.Net.Http;
 using RedditSlideshow.Models;
 using Newtonsoft.Json;
 using System.Text.RegularExpressions;
+using System.Diagnostics;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
 namespace RedditSlideshow.Views
 {
-    
+    public class MediaListUrlTitleConverter : IValueConverter {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            MediaUrlList list = value as MediaUrlList;
+            return list.Url.Title;
+
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class MediaListUrlImageConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            MediaUrlList list = value as MediaUrlList;
+            return list.Url.Image;
+
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
@@ -41,6 +70,30 @@ namespace RedditSlideshow.Views
         public Slideshow()
         {
             medialist = new MediaUrlList();
+            medialist.addListener((a, e) => {
+                Debug.WriteLine("MediaLIst Property changed!");
+                MainSlideshowImage.Source = medialist.Url.Image;
+                SlideshowImageTitle.Text = medialist.Url.Title;
+                CurrentImageUrl.Text = medialist.Url.Self;
+                if (medialist.Url.Failed)
+                {
+                    LoadingRing.Visibility = Visibility.Collapsed;
+                    FailedNotification.Visibility = Visibility.Visible;
+                }
+                else if (!medialist.Url.Image_retrieved)
+                {
+
+                    FailedNotification.Visibility = Visibility.Collapsed;
+                    LoadingRing.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    Debug.Write("Collapsing both!");
+                    FailedNotification.Visibility = Visibility.Collapsed;
+                    LoadingRing.Visibility = Visibility.Collapsed;
+                }
+
+            });
             this.InitializeComponent();
 
      
@@ -85,7 +138,14 @@ namespace RedditSlideshow.Views
         {
             base.OnNavigatedTo(e);
             List<string> urls = e.Parameter as List<string>;
-            GenerateImages(urls).ContinueWith((result) => { foreach (MediaUrl obj in result.Result) { medialist.Add(obj); obj.RetrieveContent(); } });
+            GenerateImages(urls).ContinueWith((result) => { foreach (MediaUrl obj in result.Result) {
+
+                    medialist.Add(obj);
+
+                };
+            });
+
+
 
         }
 
@@ -93,6 +153,7 @@ namespace RedditSlideshow.Views
         {
             // Regex for checking image items
             Regex image_expr = new Regex(@".(?:jpg|jpeg|png|bmp|gif|gifv)$");
+            Regex gifv_expr = new Regex(@".(?:gifv)$");
 
             List<MediaUrl> list = new List<MediaUrl>();
             using (HttpClient client = new HttpClient())
@@ -110,13 +171,20 @@ namespace RedditSlideshow.Views
                         {
                             if(image_expr.IsMatch(child.data.url))
                             {
-                                string url = child.data.url;
+                                string url;
+                                if (gifv_expr.IsMatch(child.data.url))
+                                {
+                                    url = child.data.url.Substring(0, child.data.url.LastIndexOf('v'));
+                                    Debug.WriteLine("Changing " + child.data.url + " -> " + url);
+                                } else
+                                    url = child.data.url;
                                 string thumb_url = url;
+                                string self_url = "www.reddit.com" + child.data.permalink;
                                 if(!String.IsNullOrEmpty(child.data.thumbnail))
                                 {
                                     thumb_url = child.data.thumbnail;
                                 }
-                                MediaUrl media_obj = new MediaUrl(child.data.title, url, thumb_url);
+                                MediaUrl media_obj = new MediaUrl(child.data.title, url, thumb_url, self_url);
                                 list.Add(media_obj);
                             }
                         }

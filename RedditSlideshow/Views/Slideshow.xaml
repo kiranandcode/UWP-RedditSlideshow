@@ -16,14 +16,19 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Style/SlideshowStyle.xaml"/>
+                <ResourceDictionary>
+                    <local:MediaListUrlTitleConverter x:Key="TitleConverter" />
+                    <local:MediaListUrlImageConverter x:Key="ImageConverter" />
+                </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
+
     </Page.Resources>
-    
+
 
     <Grid Background="{StaticResource MainTheme_color_accent}">
-        <MediaElement Name="MainSlideshowVideo" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
-        <Image Name="MainSlideshowImage" Source="/Assets/exampleImage.jpg" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="Uniform">
+        
+        <Image Name="MainSlideshowImage" Source="" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="Uniform">
             <interactivity:Interaction.Behaviors>
                 <behaviors:Blur 
                     x:Name="ImageBackgroundBlur"
@@ -34,12 +39,16 @@
             </interactivity:Interaction.Behaviors>
         </Image>
 
-        <Button Style="{StaticResource NavigationButtonLeft}" />
 
-        <Button Style="{StaticResource NavigationButtonRight}" />
+        <ProgressRing Name="LoadingRing" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center" IsActive="True" />
+        <SymbolIcon Name="FailedNotification" Visibility="Collapsed" Symbol="Cancel" HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+        <Button Style="{StaticResource NavigationButtonLeft}" Click="{x:Bind medialist.decrementPosition}"/>
+
+        <Button Style="{StaticResource NavigationButtonRight}" Click="{x:Bind medialist.incrementPosition}" />
 
 
-        <TextBlock Text="Title" Style="{StaticResource SlideshowContentTitle}" Visibility="{Binding ElementName=TitleIsVisibleCheckbox, Path=IsChecked}" Name="SlideshowImageTitle"/>
+        <TextBlock Text="" Style="{StaticResource SlideshowContentTitle}" Visibility="{Binding ElementName=TitleIsVisibleCheckbox, Path=IsChecked}" Name="SlideshowImageTitle"/>
 
 
         <Grid VerticalAlignment="Bottom" Name="MenuContentGrid">
@@ -98,7 +107,7 @@
 
 
                         <TextBlock Style="{StaticResource MenuPopupContentTextBlockStyle}">Image Url:</TextBlock>
-                        <TextBlock Grid.Column="1" Foreground="{StaticResource MainTheme_color_bright}" Name="CurrentImageUrl"></TextBlock>
+                    <TextBlock Grid.Column="1" Foreground="{StaticResource MainTheme_color_bright}" Style="{StaticResource MenuPopupContentTextBlockStyle}" Name="CurrentImageUrl"></TextBlock>
 
 
                         <TextBlock  Grid.Row="1" Style="{StaticResource MenuPopupContentTextBlockStyle}">Auto-Forward Delay Time(s):</TextBlock>
