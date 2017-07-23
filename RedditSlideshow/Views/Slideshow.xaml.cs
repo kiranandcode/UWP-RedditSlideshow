@@ -153,7 +153,37 @@ namespace RedditSlideshow.Views
                     if(result.Result.Count == 0)
                     {
                         // No Urls retrieved, show error, return to sender.
-                        Debug.WriteLine("No Urls Retrieved");
+
+                        Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                        {
+                            Debug.WriteLine("No Urls Retrieved");
+                            var dialog = new ContentDialog()
+                            {
+                                Title = "Error - 404 Not Found",
+                                Background = Application.Current.Resources["MainTheme_color_highlight"] as SolidColorBrush,
+                            };
+                            var panel = new StackPanel()
+                            {
+                            };
+                            panel.Children.Add(new TextBlock
+                            {
+                                Text = "Unfortunately we couldn't find any image urls (ending in .png, .jpg, etc...) at the specified subreddit.",
+                                TextWrapping = TextWrapping.Wrap,
+
+                            });
+
+                            dialog.Content = panel;
+
+                            dialog.PrimaryButtonText = "Ok";
+                            dialog.PrimaryButtonClick += (sender, args) =>
+                           {
+                               GoBackButtonClick(sender, new RoutedEventArgs());
+                           };
+
+
+                            dialog.ShowAsync();
+                        });
+
                     }
                 });
              

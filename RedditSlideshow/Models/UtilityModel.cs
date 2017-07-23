@@ -116,14 +116,12 @@ namespace RedditSlideshow.Models {
 
             
             // Override the add method to also trigger the collection's property changed event
-            item.PropertyChanged += async (object sender, PropertyChangedEventArgs args) =>
+            item.PropertyChanged += (object sender, PropertyChangedEventArgs args) =>
             {
-
-
-                    base.OnPropertyChanged(args);
-
+                base.OnPropertyChanged(args);
             };
 
+            // Can not access the base element while not in the UI thread.
             Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => {
                 item.Index = base.Count;
                 base.Add(item);

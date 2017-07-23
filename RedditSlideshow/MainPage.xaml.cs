@@ -129,7 +129,7 @@ namespace RedditSlideshow
             textbox.GetBindingExpression(TextBox.TextProperty).UpdateSource();
         }
 
-        private void ShowMessageDialog(string title, string content)
+        private static void ShowMessageDialog(string title, string content)
         {
 
             var dialog = new ContentDialog() {
