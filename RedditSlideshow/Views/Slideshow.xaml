@@ -143,7 +143,7 @@
                     <GridView  Name="DisplayGrid" ItemsSource="{x:Bind medialist}">
                         <GridView.ItemTemplate>
                             <DataTemplate x:DataType="models:MediaUrl">
-                                <controls:ImageView Thumb="{x:Bind Image_Thumb_Uri}" Title="{x:Bind Title}" />
+                                <controls:ImageView Thumb="{x:Bind Image_Thumb_Uri}" Title="{x:Bind Title}" Click="ImageView_Click"/>
                             </DataTemplate>
                         </GridView.ItemTemplate>
                     </GridView>

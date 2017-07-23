@@ -27,6 +27,7 @@ using System.Diagnostics;
 using Windows.ApplicationModel.Background;
 using System.Threading;
 using Windows.System.Threading;
+using RedditSlideshow.Controls;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -112,7 +113,6 @@ namespace RedditSlideshow.Views
                 ImageBackgroundBlur.Value = 10;
                 ImageBackgroundBlur.Duration = 1000;
                 ImageBackgroundBlur.StartAnimation();
-                //DisplayGridTransform.Y -= MenuContentGrid.ActualHeight;//- 10;
             }
             else
             {
@@ -120,7 +120,6 @@ namespace RedditSlideshow.Views
                 ImageBackgroundBlur.Duration = 1000;
                 ImageBackgroundBlur.Value = 0;
                 ImageBackgroundBlur.StartAnimation();
-                //DisplayGridTransform.Y += MenuContentGrid.ActualHeight;//- 10;
 
             }
             MenuExtended = !MenuExtended;
@@ -273,6 +272,13 @@ namespace RedditSlideshow.Views
 
             if (!Int32.TryParse(AutoForwardDelayTimeTextBox.Text, out period)) period = 5;
             configureAutoTask(AutoForwardEnabledCheckbox.IsChecked ?? false, period);
+        }
+
+        private void ImageView_Click(object sender, EventArgs e)
+        {
+            ImageView view = sender as ImageView;
+            MediaUrl url = view.DataContext as MediaUrl;
+            medialist.setPosition(url.Index);
         }
     }
 }

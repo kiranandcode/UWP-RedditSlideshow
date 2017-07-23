@@ -22,13 +22,23 @@ namespace RedditSlideshow.Controls
     public sealed partial class ImageView : UserControl
     {
 
+        public event EventHandler Click;
+
+
         public ImageView()
         {
             this.InitializeComponent();
+            MainGrid.Tapped += Clicked;
         }
 
-
-
+        private void Clicked(object sender, RoutedEventArgs e)
+        {
+            var eventHandler = this.Click;
+            if(eventHandler != null)
+            {
+                eventHandler(this, new EventArgs());
+            }
+        }
         public string Title
         {
             get { return (string)GetValue(TitleProperty); }
@@ -50,8 +60,6 @@ namespace RedditSlideshow.Controls
         // Using a DependencyProperty as the backing store for Thumb.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty ThumbProperty =
             DependencyProperty.Register("Thumb", typeof(Uri), typeof(UserControl), new PropertyMetadata(0));
-
-
 
     }
 }

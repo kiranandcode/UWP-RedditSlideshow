@@ -74,26 +74,26 @@ namespace RedditSlideshow.Models {
                         prior.clearMemoryAsync();
                     }
 
-                    MediaUrl prev = base[(Index > 0 ? Index-1 : base.Count - 1)];
-                        MediaUrl next = base[(Index < base.Count - 1 ? Index + 1 : 0)];
-                    
-                    if(!next.Image_retrieved && !next.Failed && next.retrievingContent.CurrentCount == 1 && MediaUrl.totalRequestSemaphore.CurrentCount != 0)
+                    MediaUrl prev = base[(Index > 0 ? Index - 1 : base.Count - 1)];
+                    MediaUrl next = base[(Index < base.Count - 1 ? Index + 1 : 0)];
+
+                    if (!next.Image_retrieved && !next.Failed && next.retrievingContent.CurrentCount == 1 && MediaUrl.totalRequestSemaphore.CurrentCount != 0)
                         Windows.System.Threading.ThreadPool.RunAsync((workitem) => { next.RetrieveContent(); }, Windows.System.Threading.WorkItemPriority.Low);
-                    if(!prev.Image_retrieved && !prev.Failed && prev.retrievingContent.CurrentCount == 1 && MediaUrl.totalRequestSemaphore.CurrentCount != 0)
+                    if (!prev.Image_retrieved && !prev.Failed && prev.retrievingContent.CurrentCount == 1 && MediaUrl.totalRequestSemaphore.CurrentCount != 0)
                         Windows.System.Threading.ThreadPool.RunAsync((workitem) => { prev.RetrieveContent(); }, Windows.System.Threading.WorkItemPriority.Low);
 
-                        MediaUrl current = base[Index];
-                        if(!current.Image_retrieved && !current.Failed && current.retrievingContent.CurrentCount == 1 && MediaUrl.totalRequestSemaphore.CurrentCount != 0)
-                        {
+                    MediaUrl current = base[Index];
+                    if (!current.Image_retrieved && !current.Failed && current.retrievingContent.CurrentCount == 1 && MediaUrl.totalRequestSemaphore.CurrentCount != 0)
+                    {
                         Windows.System.Threading.ThreadPool.RunAsync((workitem) => { current.RetrieveContent(); }, Windows.System.Threading.WorkItemPriority.Low);
-                        }
+                    }
 
-                        
 
-                        return current;
+
+                    return current;
                 }
                 else
-                    return new MediaUrl("Placeholder", "http://lorempixel.com/400/200/", "http://lorempixel.com/400/200/", "placeholder" );
+                    throw new InvalidOperationException();
 
             }
             set
@@ -125,6 +125,7 @@ namespace RedditSlideshow.Models {
             };
 
             Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => {
+                item.Index = base.Count;
                 base.Add(item);
             });
 
@@ -157,6 +158,7 @@ namespace RedditSlideshow.Models {
         }
         public Boolean failed;
         public Boolean Failed { get { return failed;  } set { failed = value; OnPropertyChanged(); } }
+        public int Index { get; set; }
         public Uri Image_Uri { get; set; }
         public Uri Image_Thumb_Uri { get; set; }
         public string Self { get; set; }
@@ -214,7 +216,6 @@ namespace RedditSlideshow.Models {
                 {
                     // Redirect required.
                     Uri redirect_uri = response.Headers.Location;
-                    Debug.WriteLine("Redirecting to " + redirect_uri);
                     response = await client.GetAsync(redirect_uri);
                 }
                 
