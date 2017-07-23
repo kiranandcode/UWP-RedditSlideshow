@@ -154,6 +154,7 @@ namespace RedditSlideshow.Models {
                 OnPropertyChanged();
             }
         }
+        public Boolean canDownload { get { return WritableImage != null; } }
         public Boolean failed;
         public Boolean Failed { get { return failed;  } set { failed = value; OnPropertyChanged(); } }
         public int Index { get; set; }
@@ -234,8 +235,11 @@ namespace RedditSlideshow.Models {
 
                         // Reset the stream pos
                         randomAccessStream.Seek(0);
-                        WritableImage = new WriteableBitmap(Image.PixelWidth, Image.PixelHeight);
-                        WritableImage.SetSource(randomAccessStream);
+                        if (Image.PixelHeight > 0 && Image.PixelWidth > 0)
+                        {
+                            WritableImage = new WriteableBitmap(Image.PixelWidth, Image.PixelHeight);
+                            WritableImage.SetSource(randomAccessStream);
+                        }
 
                         randomAccessStream.Dispose();
                         Image_retrieved = true;

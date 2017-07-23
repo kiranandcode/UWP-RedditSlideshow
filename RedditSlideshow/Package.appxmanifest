@@ -4,7 +4,7 @@
   <mp:PhoneIdentity PhoneProductId="bec7ee63-4f68-43e6-8f82-ce968e866f52" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>RedditSlideshow</DisplayName>
-    <PublisherDisplayName>gopia</PublisherDisplayName>
+    <PublisherDisplayName>GopiandCode</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
   <Dependencies>
@@ -15,10 +15,14 @@
   </Resources>
   <Applications>
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="RedditSlideshow.App">
-      <uap:VisualElements DisplayName="RedditSlideshow" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="RedditSlideshow" BackgroundColor="transparent">
-        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png">
+      <uap:VisualElements DisplayName="RedditSlideshow" Square150x150Logo="Assets\Square150x150.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="RedditSlideshow" BackgroundColor="#2d2d86">
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" ShortName="Reddit Slideshow" Square71x71Logo="Assets\Square71x71Logo.png">
+          <uap:ShowNameOnTiles>
+            <uap:ShowOn Tile="square150x150Logo" />
+            <uap:ShowOn Tile="wide310x150Logo" />
+          </uap:ShowNameOnTiles>
         </uap:DefaultTile>
-        <uap:SplashScreen Image="Assets\SplashScreen.png" />
+        <uap:SplashScreen Image="Assets\SplashScreen.png" BackgroundColor="#2d2d86" />
       </uap:VisualElements>
     </Application>
   </Applications>

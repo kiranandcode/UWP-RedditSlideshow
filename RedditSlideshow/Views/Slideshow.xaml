@@ -131,7 +131,7 @@
                         Click="GoBackButtonClick">
                         Back to Selection Screen
                     </Button>
-                    <Button Click="downloadImageAsync" Foreground="White" Background="{StaticResource MainTheme_color_highlight}" Margin="10,0,0,0">
+                    <Button Click="downloadImageAsync" Foreground="White" Background="{StaticResource MainTheme_color_highlight}" IsEnabled="{Binding medialist.Url.canDownload}" Margin="10,0,0,0">
                         <SymbolIcon Symbol="Download"></SymbolIcon>
                     </Button>
                 </StackPanel>
