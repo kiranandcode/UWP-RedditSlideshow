@@ -88,7 +88,6 @@ namespace RedditSlideshow.Views
                 }
                 else
                 {
-                    Debug.Write("Collapsing both!");
                     FailedNotification.Visibility = Visibility.Collapsed;
                     LoadingRing.Visibility = Visibility.Collapsed;
                 }
@@ -99,7 +98,7 @@ namespace RedditSlideshow.Views
      
         }
 
-        
+
 
         private void ViewMoreButtonClick(object sender, RoutedEventArgs e)
         {

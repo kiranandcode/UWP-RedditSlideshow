@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Windows.Storage.Streams;
+using Windows.System;
 using Windows.UI.Xaml.Media.Imaging;
 
 namespace RedditSlideshow.Models {
@@ -66,7 +67,14 @@ namespace RedditSlideshow.Models {
                 if (base.Count != 0)
                 {
 
-                        MediaUrl prev = base[(Index > 0 ? Index-1 : base.Count - 1)];
+                    // To prevent memory overflows, delete the prior images if too much memory is in use
+                    if (MemoryManager.AppMemoryUsage > 500000000)
+                    {
+                        MediaUrl prior = base[(Index > 1 ? Index - 2 : base.Count + Index - 2)];
+                        prior.clearMemoryAsync();
+                    }
+
+                    MediaUrl prev = base[(Index > 0 ? Index-1 : base.Count - 1)];
                         MediaUrl next = base[(Index < base.Count - 1 ? Index + 1 : 0)];
                     
                     if(!next.Image_retrieved && !next.Failed && next.retrievingContent.CurrentCount == 1 && MediaUrl.totalRequestSemaphore.CurrentCount != 0)
@@ -170,6 +178,18 @@ namespace RedditSlideshow.Models {
             Self = self_url;
             failed = false;
         }
+
+        public async void clearMemoryAsync()
+        {
+            if (!Image_retrieved || Failed) return;
+            await retrievingContent.WaitAsync();
+
+            Image = null;
+            image_retrieved = false;
+            retrievingContent.Release();
+
+        }
+
 
         public async void RetrieveContent()
         {
