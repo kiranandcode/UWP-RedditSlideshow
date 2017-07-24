@@ -46,7 +46,6 @@ namespace RedditSlideshow.Views
         
         Boolean MenuExtended = false;
         MediaUrlList medialist;
-        GesturesServiceEndpoint gesture;
 
         public Slideshow()
         {

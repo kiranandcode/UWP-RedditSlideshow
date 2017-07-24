@@ -1,20 +1,14 @@
-﻿<ResourceDictionary
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:RedditSlideshow.Style">
-
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:RedditSlideshowCompatibility.Style">
     <Style 
         x:Key="NavigationButtonLeft" 
         TargetType="Button">
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="HorizontalAlignment" Value="Left"/>
-        <Setter Property="Foreground" Value="White"/>
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="Content">
-            <Setter.Value>
-                Back
-            </Setter.Value>
-        </Setter>
+        <Setter Property="Foreground" Value="{x:Null}"/>
+        <Setter Property="Background" Value="{x:Null}"/>
+        <Setter Property="Content" Value="Back" />
     </Style>
 
 
@@ -23,11 +17,11 @@
         TargetType="Button">
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="HorizontalAlignment" Value="Right"/>
-        <Setter Property="Foreground" Value="White"/>
-        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{x:Null}"/>
+        <Setter Property="Background" Value="{x:Null}"/>
         <Setter Property="Content">
             <Setter.Value>
-                Forward
+                ->
             </Setter.Value>
         </Setter>
     </Style>
@@ -41,7 +35,7 @@
         <Setter Property="Background" Value="{x:Null}"/>
         <Setter Property="Content">
             <Setter.Value>
-                <SymbolIcon Symbol="More" Foreground="White"/>
+                . . .
             </Setter.Value>
         </Setter>
     </Style>
@@ -67,7 +61,7 @@
         <Setter Property="Foreground" Value="{StaticResource MainTheme_color_bright}" />
     </Style>
 
-    
+
     <Style x:Key="MenuPopupContentTextBoxStyle"
            TargetType="TextBox">
         <Setter Property="Margin" Value="10,10,10,10"/>
