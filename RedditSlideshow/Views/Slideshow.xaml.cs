@@ -30,39 +30,12 @@ using Windows.System.Threading;
 using RedditSlideshow.Controls;
 using Windows.Storage;
 using Windows.Graphics.Imaging;
-
+using Microsoft.Gestures;
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
 namespace RedditSlideshow.Views
 {
-    public class MediaListUrlTitleConverter : IValueConverter {
-        public object Convert(object value, Type targetType, object parameter, string language)
-        {
-            MediaUrlList list = value as MediaUrlList;
-            return list.Url.Title;
-
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, string language)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class MediaListUrlImageConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, string language)
-        {
-            MediaUrlList list = value as MediaUrlList;
-            return list.Url.Image;
-
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, string language)
-        {
-            throw new NotImplementedException();
-        }
-    }
+   
 
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
@@ -73,6 +46,7 @@ namespace RedditSlideshow.Views
         
         Boolean MenuExtended = false;
         MediaUrlList medialist;
+        GesturesServiceEndpoint gesture;
 
         public Slideshow()
         {

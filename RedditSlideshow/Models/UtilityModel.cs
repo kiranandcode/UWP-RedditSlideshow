@@ -185,6 +185,7 @@ namespace RedditSlideshow.Models {
         {
             if (!Image_retrieved || Failed) return;
             await retrievingContent.WaitAsync();
+            
 
             Image = null;
             WritableImage = null;
