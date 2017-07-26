@@ -35,7 +35,7 @@ using Microsoft.Gestures;
 
 namespace RedditSlideshow.Views
 {
-   
+
 
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
@@ -43,14 +43,17 @@ namespace RedditSlideshow.Views
     public sealed partial class Slideshow : Page
     {
         ThreadPoolTimer autoforwardTimer;
-        
+
+
+        SemaphoreSlim totalRequestSemaphore = new SemaphoreSlim(1, 1);
         Boolean MenuExtended = false;
         MediaUrlList medialist;
 
         public Slideshow()
         {
             medialist = new MediaUrlList();
-            medialist.addListener((a, e) => {
+            medialist.addListener((a, e) =>
+            {
                 Debug.WriteLine("MediaLIst Property changed!");
                 MainSlideshowImage.Source = medialist.Url.Image;
                 SlideshowImageTitle.Text = medialist.Url.Title;
@@ -75,14 +78,14 @@ namespace RedditSlideshow.Views
             });
             this.InitializeComponent();
 
-     
+
         }
 
 
 
         private void ViewMoreButtonClick(object sender, RoutedEventArgs e)
         {
-            if(!MenuExtended)
+            if (!MenuExtended)
             {
                 menuDisplayStoryboardOpen.Begin();
                 ImageBackgroundBlur.Value = 10;
@@ -99,7 +102,7 @@ namespace RedditSlideshow.Views
             }
             MenuExtended = !MenuExtended;
 
-           
+
         }
 
         private void GoBackButtonClick(object sender, RoutedEventArgs e)
@@ -107,7 +110,7 @@ namespace RedditSlideshow.Views
             if (this.Frame.CanGoBack)
             {
                 // Deallocate resources.
-                if(autoforwardTimer != null) autoforwardTimer.Cancel();
+                if (autoforwardTimer != null) autoforwardTimer.Cancel();
                 this.Frame.GoBack();
             }
         }
@@ -116,52 +119,52 @@ namespace RedditSlideshow.Views
         {
             base.OnNavigatedTo(e);
             List<string> urls = e.Parameter as List<string>;
-           
-                GenerateImages(urls).ContinueWith((result) =>
+
+            GenerateImages(urls).ContinueWith((result) =>
+            {
+                foreach (MediaUrl obj in result.Result)
                 {
-                    foreach (MediaUrl obj in result.Result)
+
+                    medialist.Add(obj);
+
+                };
+                if (result.Result.Count == 0)
+                {
+                    // No Urls retrieved, show error, return to sender.
+
+                    Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    Debug.WriteLine("No Urls Retrieved");
+                    var dialog = new ContentDialog()
                     {
-
-                        medialist.Add(obj);
-
+                        Title = "Error - 404 Not Found",
+                        Background = Application.Current.Resources["MainTheme_color_highlight"] as SolidColorBrush,
                     };
-                    if(result.Result.Count == 0)
+                    var panel = new StackPanel()
                     {
-                        // No Urls retrieved, show error, return to sender.
+                    };
+                    panel.Children.Add(new TextBlock
+                    {
+                        Text = "Unfortunately we couldn't find any image urls (ending in .png, .jpg, etc...) at the specified subreddit.",
+                        TextWrapping = TextWrapping.Wrap,
 
-                        Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
-                        {
-                            Debug.WriteLine("No Urls Retrieved");
-                            var dialog = new ContentDialog()
-                            {
-                                Title = "Error - 404 Not Found",
-                                Background = Application.Current.Resources["MainTheme_color_highlight"] as SolidColorBrush,
-                            };
-                            var panel = new StackPanel()
-                            {
-                            };
-                            panel.Children.Add(new TextBlock
-                            {
-                                Text = "Unfortunately we couldn't find any image urls (ending in .png, .jpg, etc...) at the specified subreddit.",
-                                TextWrapping = TextWrapping.Wrap,
+                    });
 
-                            });
+                    dialog.Content = panel;
 
-                            dialog.Content = panel;
-
-                            dialog.PrimaryButtonText = "Ok";
-                            dialog.PrimaryButtonClick += (sender, args) =>
-                           {
-                               GoBackButtonClick(sender, new RoutedEventArgs());
-                           };
+                    dialog.PrimaryButtonText = "Ok";
+                    dialog.PrimaryButtonClick += (sender, args) =>
+                   {
+                       GoBackButtonClick(sender, new RoutedEventArgs());
+                   };
 
 
-                            dialog.ShowAsync();
-                        });
-
-                    }
+                    dialog.ShowAsync();
                 });
-             
+
+                }
+            });
+
 
 
 
@@ -176,7 +179,7 @@ namespace RedditSlideshow.Views
             List<MediaUrl> list = new List<MediaUrl>();
             using (HttpClient client = new HttpClient())
             {
-                
+
                 IEnumerable<string> full_uris = urls.Select(str => "https://www.reddit.com/" + str + ".json?limit=100");
                 foreach (string link in full_uris)
                 {
@@ -209,7 +212,8 @@ namespace RedditSlideshow.Views
                                     list.Add(media_obj);
                                 }
                             }
-                        } catch (UriFormatException e)
+                        }
+                        catch (UriFormatException e)
                         {
                             Debug.WriteLine(e);
                         }
@@ -243,9 +247,10 @@ namespace RedditSlideshow.Views
             if (enable)
             {
                 if (autoforwardTimer != null) autoforwardTimer.Cancel();
-                
-                autoforwardTimer = ThreadPoolTimer.CreatePeriodicTimer((source) => {
-                    
+
+                autoforwardTimer = ThreadPoolTimer.CreatePeriodicTimer((source) =>
+                {
+
                     Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                     {
                         medialist.incrementPosition();
@@ -288,44 +293,72 @@ namespace RedditSlideshow.Views
 
         private async void downloadImageAsync(object sender, RoutedEventArgs e)
         {
-            WriteableBitmap img_to_save = medialist.Url.WritableImage;
-            String filename = medialist.Url.Image_Uri.Segments.Last();
-            Debug.WriteLine(filename);
-            StorageFile x = await KnownFolders.PicturesLibrary.CreateFileAsync(filename, CreationCollisionOption.GenerateUniqueName);
-            using (IRandomAccessStream stream = await x.OpenAsync(FileAccessMode.ReadWrite))
+            MediaUrl current_image = medialist.Url;
+            if (current_image.Image_retrieved && !current_image.Failed)
             {
-                Guid id;
-                // jpg|jpeg|png|bmp|gif|gifv
-                // Figure out the type of the image.
-                if (filename.EndsWith(".jpeg") || filename.EndsWith(".jpg"))
-                {
-                    id = BitmapEncoder.JpegEncoderId;
-                }
-                else if (filename.EndsWith(".png"))
-                {
-                    id = BitmapEncoder.PngEncoderId;
-                }
-                else if (filename.EndsWith(".bmp"))
-                {
-                    id = BitmapEncoder.BmpEncoderId;
-                }
-                else if (filename.EndsWith(".gif"))
-                {
-                    id = BitmapEncoder.GifEncoderId;
-                }
-                else return;
 
 
-                BitmapEncoder encoder = await BitmapEncoder.CreateAsync(id, stream);
-                Stream pixelStream = img_to_save.PixelBuffer.AsStream();
-                byte[] pixels = new byte[pixelStream.Length];
-                await pixelStream.ReadAsync(pixels, 0, pixels.Length);
+                try
+                {
+                    await totalRequestSemaphore.WaitAsync();
 
-                encoder.SetPixelData(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Ignore, (uint)img_to_save.PixelWidth, (uint)img_to_save.PixelHeight, 96.0, 96.0, pixels);
 
-                await encoder.FlushAsync();
+                    HttpClientHandler handler = new HttpClientHandler();
+                    handler.AllowAutoRedirect = false;
+                    HttpClient client = new HttpClient(handler);
+
+                    HttpResponseMessage response = await client.GetAsync(current_image.Image_Uri);
+
+                    while (response.StatusCode == System.Net.HttpStatusCode.Redirect || response.StatusCode == System.Net.HttpStatusCode.MovedPermanently)
+                    {
+                        // Redirect required.
+                        Uri redirect_uri = response.Headers.Location;
+                        response = await client.GetAsync(redirect_uri);
+                    }
+
+                    byte[] img = await response.Content.ReadAsByteArrayAsync();
+
+                    String filename = current_image.Image_Uri.Segments.Last();
+                    StorageFile x = await KnownFolders.SavedPictures.CreateFileAsync(filename, CreationCollisionOption.GenerateUniqueName);
+                    using (IRandomAccessStream stream = await x.OpenAsync(FileAccessMode.ReadWrite))
+                    {
+
+                        using (var output = stream.GetOutputStreamAt(0))
+                        {
+                            using (DataWriter writer = new DataWriter(output))
+                            {
+                                writer.WriteBytes(img);
+                                await writer.StoreAsync();
+                            }
+
+                        }
+
+
+                    }
+                }
+                catch (System.Threading.Tasks.TaskCanceledException except2)
+                {
+                    Debug.WriteLine(except2);
+                }
+                catch (HttpRequestException excep3)
+                {
+                    Debug.WriteLine(excep3);
+                }
+                finally
+                {
+                    totalRequestSemaphore.Release();
+
+                }
+
             }
-            
+
+
+
+
+
+
+
+
 
         }
 

@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:RedditSlideshowCompatibility"
         xmlns:metro="http://schemas.microsoft.com/xps/2005/06"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="MainWindow" Height="720" Width="1280">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

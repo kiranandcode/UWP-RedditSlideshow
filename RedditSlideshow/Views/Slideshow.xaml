@@ -16,10 +16,6 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Style/SlideshowStyle.xaml"/>
-                <ResourceDictionary>
-                    <local:MediaListUrlTitleConverter x:Key="TitleConverter" />
-                    <local:MediaListUrlImageConverter x:Key="ImageConverter" />
-                </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
 
