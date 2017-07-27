@@ -15,6 +15,9 @@ namespace RedditSlideshow.Models {
     public class MediaUrlList : ObservableCollection<MediaUrl>
     {
         private int index = 0;
+        private int prefetched = 0;
+        enum Direction{ PREV, NEXT, NONE};
+        Direction direction = Direction.NONE;
 
         public void addListener(PropertyChangedEventHandler del)
         {
@@ -33,30 +36,133 @@ namespace RedditSlideshow.Models {
             }
         }
 
+        /*
+                             // To prevent memory overflows, delete the prior images if too much memory is in use
+                    //if (MemoryManager.AppMemoryUsage > 500000000 && base.Count > 5)
+                    //{
+                    //  MediaUrl prior = base[(Index > 1 ? Index - 2 : base.Count + Index - 2)];
+                    //prior.clearMemoryAsync();
+                    //}
+                    if (base.Count > 3)
+                    {
+                        MediaUrl prev = base[(Index > 0 ? Index - 1 : base.Count - 1)];
+                        MediaUrl next = base[(Index < base.Count - 1 ? Index + 1 : 0)];
+
+                        if (!next.Image_retrieved && !next.failed)
+                            Windows.System.Threading.ThreadPool.RunAsync((workitem) => { next.clearMemoryAsync(); }, Windows.System.Threading.WorkItemPriority.Low);
+                        if (prev.Image_retrieved)
+                            Windows.System.Threading.ThreadPool.RunAsync((workitem) => { prev.clearMemoryAsync(); }, Windows.System.Threading.WorkItemPriority.Low);
+                    }
+
+             */
+
         public void incrementPosition()
         {
             if (base.Count != 0)
-                Index = (Index + 1) % base.Count;
+            {
+                
+                int current = Index;
+                int next = (current + 1) % base.Count;
+                int nextplusone = (current + 1) % base.Count;
+
+                base[current].clearMemoryAsync();
+                
+                switch (direction)
+                {
+                    case Direction.PREV:
+                        if (prefetched != -1)
+                        {
+                            base[prefetched].clearMemoryAsync();
+                            prefetched = -1;
+                        }
+                        base[next].RetrieveContent();
+                        break;
+                    case Direction.NEXT:
+                        break;
+                    case Direction.NONE:
+                        base[next].RetrieveContent();
+                        break;
+
+                }
+
+                base[nextplusone].RetrieveContent();
+                prefetched = nextplusone;
+                direction = Direction.NEXT;
+                Index = next;
+            }
         }
 
         public void decrementPosition()
         {
-            if (Index > 0)
+            if (base.Count != 0)
             {
-                Index = (Index - 1);
-            } else
-            {
-                Index = base.Count - 1;
+
+                int current = Index;
+                int prev = current > 0 ? ((current - 1) % base.Count) : (base.Count - 1);
+                int prevplusone = current > 1 ? ((current - 2) % base.Count) : (base.Count + current - 2);
+
+                base[current].clearMemoryAsync();
+
+
+                switch (direction)
+                {
+                    case Direction.PREV:
+                        break;
+                    case Direction.NONE:
+                        base[prev].clearMemoryAsync();
+                        break;
+                    case Direction.NEXT:
+                        if(prefetched != -1)
+                        {
+                            base[prefetched].clearMemoryAsync();
+                            prefetched = -1;
+                        }
+                        base[prev].RetrieveContent();
+                        break;
+                }
+
+                base[prevplusone].RetrieveContent();
+                prefetched = prevplusone;
+                direction = Direction.PREV;
+                Index = prev;
             }
         }
 
         public void setPosition(int position)
         {
-            position = position % base.Count;
+            
             while (position < 0) position += base.Count;
+            position = position % base.Count;
             while (position > base.Count) position -= base.Count;
-            Index = position;
 
+
+            int current = Index;
+            int prev = current > 0 ? (current - 1) % base.Count : base.Count - 1;
+            int next = (current + 1) % base.Count;
+
+            if(position == prev)
+            {
+                decrementPosition();
+            } else if(position == next)
+            {
+                incrementPosition();
+            } else if(position == current)
+            {
+                return;
+            } else
+            {
+               
+                base[current].clearMemoryAsync();
+                base[position].RetrieveContent();
+                Index = position;
+                direction = Direction.NONE;
+                if (prefetched != -1)
+                {
+                    base[prefetched].clearMemoryAsync();
+                }
+                prefetched = -1;
+            }
+           
         }
 
         public MediaUrl Url
@@ -67,25 +173,11 @@ namespace RedditSlideshow.Models {
                 if (base.Count != 0)
                 {
 
-                    // To prevent memory overflows, delete the prior images if too much memory is in use
-                    if (MemoryManager.AppMemoryUsage > 500000000 && base.Count > 5)
-                    {
-                        MediaUrl prior = base[(Index > 1 ? Index - 2 : base.Count + Index - 2)];
-                        prior.clearMemoryAsync();
-                    }
-
-                    MediaUrl prev = base[(Index > 0 ? Index - 1 : base.Count - 1)];
-                    MediaUrl next = base[(Index < base.Count - 1 ? Index + 1 : 0)];
-
-                    if (!next.Image_retrieved && !next.Failed && next.retrievingContent.CurrentCount == 1 && MediaUrl.totalRequestSemaphore.CurrentCount != 0)
-                        Windows.System.Threading.ThreadPool.RunAsync((workitem) => { next.RetrieveContent(); }, Windows.System.Threading.WorkItemPriority.Low);
-                    if (!prev.Image_retrieved && !prev.Failed && prev.retrievingContent.CurrentCount == 1 && MediaUrl.totalRequestSemaphore.CurrentCount != 0)
-                        Windows.System.Threading.ThreadPool.RunAsync((workitem) => { prev.RetrieveContent(); }, Windows.System.Threading.WorkItemPriority.Low);
 
                     MediaUrl current = base[Index];
-                    if (!current.Image_retrieved && !current.Failed && current.retrievingContent.CurrentCount == 1 && MediaUrl.totalRequestSemaphore.CurrentCount != 0)
+                    if (!current.Image_retrieved && !current.Failed)
                     {
-                        Windows.System.Threading.ThreadPool.RunAsync((workitem) => { current.RetrieveContent(); }, Windows.System.Threading.WorkItemPriority.Low);
+                        current.RetrieveContent();
                     }
 
 
@@ -185,21 +277,42 @@ namespace RedditSlideshow.Models {
         public async void clearMemoryAsync()
         {
             if (!Image_retrieved || Failed) return;
-            await retrievingContent.WaitAsync();
+            //await retrievingContent.WaitAsync();
             
 
             Image = null;
 
             image_retrieved = false;
-            retrievingContent.Release();
+            //retrievingContent.Release();
 
         }
 
 
         public async void RetrieveContent()
         {
+            if (Image_retrieved) return;
+            //await retrievingContent.WaitAsync();
+            //Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            {
 
-            // If we're already retrieving the image, wait.
+
+                
+                Image = new BitmapImage(Image_Uri);
+                Image.ImageOpened += (object sender, Windows.UI.Xaml.RoutedEventArgs args) =>
+                {
+                    Image_retrieved = true;
+                };
+                Image.ImageFailed += (object sender, Windows.UI.Xaml.ExceptionRoutedEventArgs args) => {
+                    Image_retrieved = true;
+                    failed = true;
+
+                };
+
+              //  retrievingContent.Release();
+            }
+            //);
+
+            /*// If we're already retrieving the image, wait.
             await retrievingContent.WaitAsync();
            
             try {
@@ -261,6 +374,7 @@ namespace RedditSlideshow.Models {
 
                 retrievingContent.Release();
             }
+        */
         }
 
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -268,7 +382,6 @@ namespace RedditSlideshow.Models {
 
             this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
         }
-
     }
 
 

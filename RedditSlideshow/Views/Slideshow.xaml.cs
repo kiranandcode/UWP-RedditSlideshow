@@ -293,11 +293,12 @@ namespace RedditSlideshow.Views
 
         private async void downloadImageAsync(object sender, RoutedEventArgs e)
         {
-            MediaUrl current_image = medialist.Url;
-            if (current_image.Image_retrieved && !current_image.Failed)
+            
+            if (medialist.Count != 0)
             {
 
-
+                MediaUrl current_image = medialist.Url;
+                if(current_image.Image_retrieved && !current_image.Failed)
                 try
                 {
                     await totalRequestSemaphore.WaitAsync();
