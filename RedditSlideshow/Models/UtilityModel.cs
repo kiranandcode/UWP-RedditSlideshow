@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks;
 using Windows.Storage.Streams;
 using Windows.System;
 using Windows.UI.Xaml.Media.Imaging;
@@ -63,30 +64,34 @@ namespace RedditSlideshow.Models {
                 
                 int current = Index;
                 int next = (current + 1) % base.Count;
-                int nextplusone = (current + 1) % base.Count;
 
-                base[current].clearMemoryAsync();
-                
-                switch (direction)
+                if (base.Count > 3)
                 {
-                    case Direction.PREV:
-                        if (prefetched != -1)
-                        {
-                            base[prefetched].clearMemoryAsync();
-                            prefetched = -1;
-                        }
-                        base[next].RetrieveContent();
-                        break;
-                    case Direction.NEXT:
-                        break;
-                    case Direction.NONE:
-                        base[next].RetrieveContent();
-                        break;
+                    int nextplusone = (current + 1) % base.Count;
 
+                    base[current].clearMemory();
+
+                    switch (direction)
+                    {
+                        case Direction.PREV:
+                            if (prefetched != -1)
+                            {
+                                base[prefetched].clearMemory();
+                                prefetched = -1;
+                            }
+                            base[next].RetrieveContent();
+                            break;
+                        case Direction.NEXT:
+                            break;
+                        case Direction.NONE:
+                            base[next].RetrieveContent();
+                            break;
+
+                    }
+
+                    base[nextplusone].RetrieveContent();
+                    prefetched = nextplusone;
                 }
-
-                base[nextplusone].RetrieveContent();
-                prefetched = nextplusone;
                 direction = Direction.NEXT;
                 Index = next;
             }
@@ -98,31 +103,35 @@ namespace RedditSlideshow.Models {
             {
 
                 int current = Index;
+                
                 int prev = current > 0 ? ((current - 1) % base.Count) : (base.Count - 1);
-                int prevplusone = current > 1 ? ((current - 2) % base.Count) : (base.Count + current - 2);
-
-                base[current].clearMemoryAsync();
-
-
-                switch (direction)
+                if (base.Count > 3)
                 {
-                    case Direction.PREV:
-                        break;
-                    case Direction.NONE:
-                        base[prev].clearMemoryAsync();
-                        break;
-                    case Direction.NEXT:
-                        if(prefetched != -1)
-                        {
-                            base[prefetched].clearMemoryAsync();
-                            prefetched = -1;
-                        }
-                        base[prev].RetrieveContent();
-                        break;
-                }
+                    int prevplusone = current > 1 ? ((current - 2) % base.Count) : (base.Count + current - 2);
 
-                base[prevplusone].RetrieveContent();
-                prefetched = prevplusone;
+                    base[current].clearMemory();
+
+
+                    switch (direction)
+                    {
+                        case Direction.PREV:
+                            break;
+                        case Direction.NONE:
+                            base[prev].clearMemory();
+                            break;
+                        case Direction.NEXT:
+                            if (prefetched != -1)
+                            {
+                                base[prefetched].clearMemory();
+                                prefetched = -1;
+                            }
+                            base[prev].RetrieveContent();
+                            break;
+                    }
+
+                    base[prevplusone].RetrieveContent();
+                    prefetched = prevplusone;
+                }
                 direction = Direction.PREV;
                 Index = prev;
             }
@@ -152,13 +161,13 @@ namespace RedditSlideshow.Models {
             } else
             {
                
-                base[current].clearMemoryAsync();
+                base[current].clearMemory();
                 base[position].RetrieveContent();
                 Index = position;
                 direction = Direction.NONE;
                 if (prefetched != -1)
                 {
-                    base[prefetched].clearMemoryAsync();
+                    base[prefetched].clearMemory();
                 }
                 prefetched = -1;
             }
@@ -234,6 +243,7 @@ namespace RedditSlideshow.Models {
     {
         public static SemaphoreSlim totalRequestSemaphore = new SemaphoreSlim(5, 5);
         private Boolean image_retrieved;
+        public Task current_Task = null;
 
         public Boolean Image_retrieved {
             get
@@ -274,24 +284,53 @@ namespace RedditSlideshow.Models {
             failed = false;
         }
 
-        public async void clearMemoryAsync()
+        private async Task clearMemoryAsync()
         {
             if (!Image_retrieved || Failed) return;
-            //await retrievingContent.WaitAsync();
+            await retrievingContent.WaitAsync();
             
 
             Image = null;
 
             image_retrieved = false;
-            //retrievingContent.Release();
+            retrievingContent.Release();
 
         }
+        public void clearMemory()
+        {
+            if (current_Task == null || current_Task.IsCompleted || current_Task.IsCanceled || current_Task.IsFaulted)
+            {
+                // current task can be discarded
+                current_Task = clearMemoryAsync();
+            }
+            else
+            {
+                current_Task = current_Task.ContinueWith(async (task) =>
+                {
+                    await clearMemoryAsync();
+                });
+            }
+        }
 
+        public void RetrieveContent()
+        {
+            if(current_Task == null || current_Task.IsCompleted || current_Task.IsCanceled || current_Task.IsFaulted)
+            {
+                // current task can be discarded
+                current_Task = RetrieveContentAsync();
+            } else
+            {
+                current_Task = current_Task.ContinueWith(async (task) =>
+                {
+                    await RetrieveContentAsync();
+                });
+            }
+        }
 
-        public async void RetrieveContent()
+        private async Task RetrieveContentAsync()
         {
             if (Image_retrieved) return;
-            //await retrievingContent.WaitAsync();
+            await retrievingContent.WaitAsync();
             //Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
             {
 
@@ -308,7 +347,7 @@ namespace RedditSlideshow.Models {
 
                 };
 
-              //  retrievingContent.Release();
+               retrievingContent.Release();
             }
             //);
 

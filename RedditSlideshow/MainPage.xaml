@@ -19,7 +19,7 @@
 
     <ScrollViewer Background="{StaticResource MainTheme_color}">
         <RelativePanel>
-            <TextBlock Text="Reddit Slideshow" 
+            <TextBlock Text="Reddit Slideshow (unofficial)" 
                        Style="{StaticResource HeaderLogoStyle}"
                        RelativePanel.Above="MainPageContentPanel" 
                        RelativePanel.AlignHorizontalCenterWith="MainPageContentPanel"/>

@@ -5,8 +5,6 @@ VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedditSlideshow", "RedditSlideshow\RedditSlideshow.csproj", "{44F01FB7-3E05-4A76-9E2F-D428B80BE1FF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedditSlideshowCompatibility", "RedditSlideshowCompatibility\RedditSlideshowCompatibility.csproj", "{2796F8D8-3268-4200-A96C-A873C7B5ACCB}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,22 +37,6 @@ Global
 		{44F01FB7-3E05-4A76-9E2F-D428B80BE1FF}.Release|x86.ActiveCfg = Release|x86
 		{44F01FB7-3E05-4A76-9E2F-D428B80BE1FF}.Release|x86.Build.0 = Release|x86
 		{44F01FB7-3E05-4A76-9E2F-D428B80BE1FF}.Release|x86.Deploy.0 = Release|x86
-		{2796F8D8-3268-4200-A96C-A873C7B5ACCB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2796F8D8-3268-4200-A96C-A873C7B5ACCB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2796F8D8-3268-4200-A96C-A873C7B5ACCB}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{2796F8D8-3268-4200-A96C-A873C7B5ACCB}.Debug|ARM.Build.0 = Debug|Any CPU
-		{2796F8D8-3268-4200-A96C-A873C7B5ACCB}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{2796F8D8-3268-4200-A96C-A873C7B5ACCB}.Debug|x64.Build.0 = Debug|Any CPU
-		{2796F8D8-3268-4200-A96C-A873C7B5ACCB}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{2796F8D8-3268-4200-A96C-A873C7B5ACCB}.Debug|x86.Build.0 = Debug|Any CPU
-		{2796F8D8-3268-4200-A96C-A873C7B5ACCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2796F8D8-3268-4200-A96C-A873C7B5ACCB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2796F8D8-3268-4200-A96C-A873C7B5ACCB}.Release|ARM.ActiveCfg = Release|Any CPU
-		{2796F8D8-3268-4200-A96C-A873C7B5ACCB}.Release|ARM.Build.0 = Release|Any CPU
-		{2796F8D8-3268-4200-A96C-A873C7B5ACCB}.Release|x64.ActiveCfg = Release|Any CPU
-		{2796F8D8-3268-4200-A96C-A873C7B5ACCB}.Release|x64.Build.0 = Release|Any CPU
-		{2796F8D8-3268-4200-A96C-A873C7B5ACCB}.Release|x86.ActiveCfg = Release|Any CPU
-		{2796F8D8-3268-4200-A96C-A873C7B5ACCB}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
