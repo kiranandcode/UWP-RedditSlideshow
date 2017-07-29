@@ -31,6 +31,8 @@ using RedditSlideshow.Controls;
 using Windows.Storage;
 using Windows.Graphics.Imaging;
 using Microsoft.Gestures;
+using Windows.UI.Xaml.Automation.Peers;
+using Windows.UI.Xaml.Automation.Provider;
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
 namespace RedditSlideshow.Views
@@ -362,6 +364,39 @@ namespace RedditSlideshow.Views
             }
             
         }
-    
+
+        private void SlideshowKeyHandler(object sender, KeyRoutedEventArgs e)
+        {
+            if(e.Key == Windows.System.VirtualKey.Left) {
+                ButtonAutomationPeer peer = new ButtonAutomationPeer(LeftButton);
+
+                IInvokeProvider invokeProv = peer.GetPattern(PatternInterface.Invoke) as IInvokeProvider;
+                invokeProv.Invoke();
+            }
+            else if(e.Key == Windows.System.VirtualKey.Right)
+            {
+                ButtonAutomationPeer peer = new ButtonAutomationPeer(RightButton);
+
+                IInvokeProvider invokeProv = peer.GetPattern(PatternInterface.Invoke) as IInvokeProvider;
+                invokeProv.Invoke();
+            }
+            else if(e.Key == Windows.System.VirtualKey.Up) {
+                ButtonAutomationPeer peer = new ButtonAutomationPeer(ViewMoreButton);
+
+                IInvokeProvider invokeProv = peer.GetPattern(PatternInterface.Invoke) as IInvokeProvider;
+                invokeProv.Invoke();
+            }
+            else if(e.Key == Windows.System.VirtualKey.Down)
+            {
+                if (MenuExtended)
+                {
+                    ButtonAutomationPeer peer = new ButtonAutomationPeer(ViewMoreButton);
+
+                    IInvokeProvider invokeProv = peer.GetPattern(PatternInterface.Invoke) as IInvokeProvider;
+                    invokeProv.Invoke();
+                }
+                else downloadImageAsync(this, new RoutedEventArgs());
+            }
+        }
     }
 }

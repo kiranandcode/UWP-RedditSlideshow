@@ -10,7 +10,8 @@
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     xmlns:behaviors="using:Microsoft.Toolkit.Uwp.UI.Animations.Behaviors"
     xmlns:controls="using:RedditSlideshow.Controls"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    KeyDown="SlideshowKeyHandler">
 
     <Page.Resources>
         <ResourceDictionary>
@@ -39,9 +40,9 @@
         <ProgressRing Name="LoadingRing" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center" IsActive="True" />
         <SymbolIcon Name="FailedNotification" Visibility="Collapsed" Symbol="Cancel" HorizontalAlignment="Center" VerticalAlignment="Center" />
 
-        <Button Style="{StaticResource NavigationButtonLeft}" Click="{x:Bind medialist.decrementPosition}"/>
+        <Button Style="{StaticResource NavigationButtonLeft}" Click="{x:Bind medialist.decrementPosition}" Name="LeftButton"/>
 
-        <Button Style="{StaticResource NavigationButtonRight}" Click="{x:Bind medialist.incrementPosition}" />
+        <Button Style="{StaticResource NavigationButtonRight}" Click="{x:Bind medialist.incrementPosition}" Name="RightButton"/>
 
 
         <TextBlock Text="" Style="{StaticResource SlideshowContentTitle}" Visibility="{Binding ElementName=TitleIsVisibleCheckbox, Path=IsChecked}" Name="SlideshowImageTitle"/>
@@ -78,6 +79,7 @@
             </Grid.Resources>
 
             <Button
+                Name="ViewMoreButton"
                 Style="{StaticResource NavigationButtonMore}"
                 Grid.Row="0" Click="ViewMoreButtonClick" />
 
