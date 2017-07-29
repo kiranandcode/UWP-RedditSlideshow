@@ -52,30 +52,7 @@ namespace RedditSlideshow.Views
         public Slideshow()
         {
             medialist = new MediaUrlList();
-            medialist.addListener((a, e) =>
-            {
-                Debug.WriteLine("MediaLIst Property changed!");
-                MainSlideshowImage.Source = medialist.Url.Image;
-                SlideshowImageTitle.Text = medialist.Url.Title;
-                CurrentImageUrl.Text = medialist.Url.Self;
-                if (medialist.Url.Failed)
-                {
-                    LoadingRing.Visibility = Visibility.Collapsed;
-                    FailedNotification.Visibility = Visibility.Visible;
-                }
-                else if (!medialist.Url.Image_retrieved)
-                {
-
-                    FailedNotification.Visibility = Visibility.Collapsed;
-                    LoadingRing.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    FailedNotification.Visibility = Visibility.Collapsed;
-                    LoadingRing.Visibility = Visibility.Collapsed;
-                }
-
-            });
+            
             this.InitializeComponent();
 
 
@@ -128,6 +105,36 @@ namespace RedditSlideshow.Views
                     medialist.Add(obj);
 
                 };
+
+
+                medialist.addListener((a, f) =>
+                {
+                    Debug.WriteLine("MediaLIst Property changed!");
+                    MainSlideshowImage.Source = medialist.Url.Image;
+                    SlideshowImageTitle.Text = medialist.Url.Title;
+                    CurrentImageUrl.Text = medialist.Url.Self;
+                    if (medialist.Url.Failed)
+                    {
+                        LoadingRing.Visibility = Visibility.Collapsed;
+                        FailedNotification.Visibility = Visibility.Visible;
+                    }
+                    else if (!medialist.Url.Image_retrieved)
+                    {
+
+                        FailedNotification.Visibility = Visibility.Collapsed;
+                        LoadingRing.Visibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        FailedNotification.Visibility = Visibility.Collapsed;
+                        LoadingRing.Visibility = Visibility.Collapsed;
+                    }
+
+                });
+                
+
+
+
                 if (result.Result.Count == 0)
                 {
                     // No Urls retrieved, show error, return to sender.
@@ -286,6 +293,7 @@ namespace RedditSlideshow.Views
 
         private void ImageView_Click(object sender, EventArgs e)
         {
+            
             ImageView view = sender as ImageView;
             MediaUrl url = view.DataContext as MediaUrl;
             medialist.setPosition(url.Index);
@@ -352,17 +360,8 @@ namespace RedditSlideshow.Views
                 }
 
             }
-
-
-
-
-
-
-
-
-
+            
         }
-
-
+    
     }
 }

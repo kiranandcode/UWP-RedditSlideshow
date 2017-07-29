@@ -24,7 +24,14 @@
             <RowDefinition Height="*"  />
         </Grid.RowDefinitions>
 
-        <Image Height="80" Grid.Row="0" Source="{Binding Thumb, ElementName=GridViewUserControl}" Stretch="Uniform" />
+        <Image Height="80" Grid.Row="0" Stretch="Uniform">
+            <Image.Source>
+                <BitmapImage
+                    UriSource="{Binding Thumb, ElementName=GridViewUserControl}"
+                    />
+            </Image.Source>
+
+        </Image>
         <TextBlock Grid.Row="1" Text="{Binding Title, ElementName=GridViewUserControl}" />
     </Grid>
 </animation:UserControl>

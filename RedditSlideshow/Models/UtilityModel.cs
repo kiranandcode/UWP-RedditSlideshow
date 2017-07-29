@@ -214,14 +214,10 @@ namespace RedditSlideshow.Models {
 
         public new void Add(MediaUrl item)
         {
-
-            
-            // Override the add method to also trigger the collection's property changed event
             item.PropertyChanged += (object sender, PropertyChangedEventArgs args) =>
             {
                 base.OnPropertyChanged(args);
             };
-
             // Can not access the base element while not in the UI thread.
             Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => {
                 item.Index = base.Count;
@@ -230,7 +226,12 @@ namespace RedditSlideshow.Models {
 
         }
 
-        public void Changed([CallerMemberName] string propertyName = null)
+        public void changed()
+        {
+            Changed();
+        }
+
+        private void Changed([CallerMemberName] string propertyName = null)
         {
            
                 base.OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
@@ -241,9 +242,8 @@ namespace RedditSlideshow.Models {
     // Class Representing a MediaItem - Also encapsulating the async call to retrieve the data
     public class MediaUrl : INotifyPropertyChanged
     {
-        public static SemaphoreSlim totalRequestSemaphore = new SemaphoreSlim(5, 5);
         private Boolean image_retrieved;
-        public Task current_Task = null;
+        //public Task current_Task = null;
 
         public Boolean Image_retrieved {
             get
@@ -270,7 +270,6 @@ namespace RedditSlideshow.Models {
 
         public BitmapImage Image { get; set; }
        
-        public SemaphoreSlim retrievingContent = new SemaphoreSlim(1,1);
 
         public event PropertyChangedEventHandler PropertyChanged = delegate { };
 
@@ -287,17 +286,22 @@ namespace RedditSlideshow.Models {
         private async Task clearMemoryAsync()
         {
             if (!Image_retrieved || Failed) return;
-            await retrievingContent.WaitAsync();
             
 
             Image = null;
 
             image_retrieved = false;
-            retrievingContent.Release();
 
         }
         public void clearMemory()
         {
+            if (!Image_retrieved || Failed) return;
+
+
+            Image = null;
+
+            image_retrieved = false;
+            /*
             if (current_Task == null || current_Task.IsCompleted || current_Task.IsCanceled || current_Task.IsFaulted)
             {
                 // current task can be discarded
@@ -309,11 +313,30 @@ namespace RedditSlideshow.Models {
                 {
                     await clearMemoryAsync();
                 });
-            }
+            }*/
         }
 
         public void RetrieveContent()
         {
+            if (Image_retrieved) return;
+            //Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            {
+
+
+
+                Image = new BitmapImage(Image_Uri);
+                Image.ImageOpened += (object sender, Windows.UI.Xaml.RoutedEventArgs args) =>
+                {
+                    Image_retrieved = true;
+                };
+                Image.ImageFailed += (object sender, Windows.UI.Xaml.ExceptionRoutedEventArgs args) => {
+                    Image_retrieved = true;
+                    failed = true;
+
+                };
+
+            }
+            /*
             if(current_Task == null || current_Task.IsCompleted || current_Task.IsCanceled || current_Task.IsFaulted)
             {
                 // current task can be discarded
@@ -324,13 +347,12 @@ namespace RedditSlideshow.Models {
                 {
                     await RetrieveContentAsync();
                 });
-            }
+            }*/
         }
 
         private async Task RetrieveContentAsync()
         {
             if (Image_retrieved) return;
-            await retrievingContent.WaitAsync();
             //Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
             {
 
@@ -346,8 +368,7 @@ namespace RedditSlideshow.Models {
                     failed = true;
 
                 };
-
-               retrievingContent.Release();
+                
             }
             //);
 

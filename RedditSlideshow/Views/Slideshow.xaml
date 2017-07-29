@@ -137,17 +137,34 @@
                 
 
 
-
-                <ScrollViewer Grid.Row="2" HorizontalAlignment="Center" Height="200">
-                    <GridView  Name="DisplayGrid" ItemsSource="{x:Bind medialist}">
+                <!--<ScrollViewer  HorizontalAlignment="Center" Height="200">-->
+                <GridView 
+                    Grid.Row="2"  
+                    Height="200"  
+                    Name="DisplayGrid" 
+                    HorizontalAlignment="Center" 
+                    VerticalAlignment="Center" 
+                    ItemsSource="{x:Bind medialist}"
+                    
+                    >
+                        <GridView.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <ItemsWrapGrid HorizontalAlignment="Center" 
+                                               VerticalAlignment="Center" 
+                                               Orientation="Horizontal"
+                                               CacheLength="1"
+                                               />
+                            </ItemsPanelTemplate>
+                        </GridView.ItemsPanel>
                         <GridView.ItemTemplate>
-                            <DataTemplate x:DataType="models:MediaUrl">
-                                <controls:ImageView Thumb="{x:Bind Image_Thumb_Uri}" Title="{x:Bind Title}" Click="ImageView_Click"/>
-                            </DataTemplate>
+                        <DataTemplate x:DataType="models:MediaUrl"   >
+                            <controls:ImageView Thumb="{x:Bind Image_Thumb_Uri}" Title="{x:Bind Title}" Click="ImageView_Click"/> 
+                            
+                        </DataTemplate>
                         </GridView.ItemTemplate>
                     </GridView>
 
-                </ScrollViewer>
+                <!--</ScrollViewer>-->
 
             </Grid>
         </Grid>
