@@ -8,11 +8,17 @@ Jokes aside, feels good to finally ship the thing - It's just been approved on t
 
 ## Screenshots
 ![Landing Page][landingpage]
+
 The Landing page for the application. The Logo positioning has been ~~frustratingly~~ carefully adjusted to look good on all sizes.
+
 ![Image View Page][imageviewpage]
+
 How the actual slideshow looks. Potentially in the future I'll make the icons fade on a lack of mouse movement.
+
 ![Options Page][optionspage]
+
 Selecting options - also notice the blur effect on the image. Took me friggen ages to get right.
+
 ![On the Start Menu][startmenu]
 
 
