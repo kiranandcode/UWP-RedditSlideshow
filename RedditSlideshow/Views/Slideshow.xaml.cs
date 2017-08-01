@@ -33,11 +33,13 @@ using Windows.Graphics.Imaging;
 using Microsoft.Gestures;
 using Windows.UI.Xaml.Automation.Peers;
 using Windows.UI.Xaml.Automation.Provider;
+using Windows.UI.Core;
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
 namespace RedditSlideshow.Views
 {
 
+    
 
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
@@ -54,12 +56,14 @@ namespace RedditSlideshow.Views
         public Slideshow()
         {
             medialist = new MediaUrlList();
-            
+
+
+
+
             this.InitializeComponent();
 
-
+            Window.Current.CoreWindow.KeyDown += CoreWindow_KeyDown;
         }
-
 
 
         private void ViewMoreButtonClick(object sender, RoutedEventArgs e)
@@ -93,19 +97,24 @@ namespace RedditSlideshow.Views
                 this.Frame.GoBack();
             }
         }
+        
+        
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
+
             base.OnNavigatedTo(e);
+
+
+
             List<string> urls = e.Parameter as List<string>;
 
             GenerateImages(urls).ContinueWith((result) =>
             {
-                foreach (MediaUrl obj in result.Result)
+                for (int i = 0; i< result.Result.Count-1; i++)
                 {
-
+                    MediaUrl obj = result.Result[i];
                     medialist.Add(obj);
-
                 };
 
 
@@ -133,7 +142,10 @@ namespace RedditSlideshow.Views
                     }
 
                 });
-                
+
+                medialist.Add(result.Result.Last());
+
+
 
 
 
@@ -174,8 +186,7 @@ namespace RedditSlideshow.Views
                 }
             });
 
-
-
+            
 
         }
 
@@ -398,5 +409,46 @@ namespace RedditSlideshow.Views
                 else downloadImageAsync(this, new RoutedEventArgs());
             }
         }
+
+
+        private void CoreWindow_KeyDown(CoreWindow sender, KeyEventArgs args)
+        {
+
+            if (args.VirtualKey == Windows.System.VirtualKey.Left)
+            {
+                ButtonAutomationPeer peer = new ButtonAutomationPeer(LeftButton);
+
+                IInvokeProvider invokeProv = peer.GetPattern(PatternInterface.Invoke) as IInvokeProvider;
+                invokeProv.Invoke();
+            }
+            else if (args.VirtualKey == Windows.System.VirtualKey.Right)
+            {
+                ButtonAutomationPeer peer = new ButtonAutomationPeer(RightButton);
+
+                IInvokeProvider invokeProv = peer.GetPattern(PatternInterface.Invoke) as IInvokeProvider;
+                invokeProv.Invoke();
+            }
+            else if (args.VirtualKey == Windows.System.VirtualKey.Up)
+            {
+                ButtonAutomationPeer peer = new ButtonAutomationPeer(ViewMoreButton);
+
+                IInvokeProvider invokeProv = peer.GetPattern(PatternInterface.Invoke) as IInvokeProvider;
+                invokeProv.Invoke();
+            }
+            else if (args.VirtualKey == Windows.System.VirtualKey.Down)
+            {
+                if (MenuExtended)
+                {
+                    ButtonAutomationPeer peer = new ButtonAutomationPeer(ViewMoreButton);
+
+                    IInvokeProvider invokeProv = peer.GetPattern(PatternInterface.Invoke) as IInvokeProvider;
+                    invokeProv.Invoke();
+                }
+                else downloadImageAsync(this, new RoutedEventArgs());
+            }
+
+
+        }
+
     }
 }

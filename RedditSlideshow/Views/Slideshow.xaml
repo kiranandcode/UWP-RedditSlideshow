@@ -11,7 +11,7 @@
     xmlns:behaviors="using:Microsoft.Toolkit.Uwp.UI.Animations.Behaviors"
     xmlns:controls="using:RedditSlideshow.Controls"
     mc:Ignorable="d"
-    KeyDown="SlideshowKeyHandler">
+    >
 
     <Page.Resources>
         <ResourceDictionary>
@@ -23,9 +23,9 @@
     </Page.Resources>
 
 
-    <Grid Background="{StaticResource MainTheme_color_accent}">
-        
-        <Image Name="MainSlideshowImage" Source="" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="Uniform">
+    <Grid Background="{StaticResource MainTheme_color_accent}" Name="MainGrid">
+
+        <Image Name="MainSlideshowImage" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="Uniform" >
             <interactivity:Interaction.Behaviors>
                 <behaviors:Blur 
                     x:Name="ImageBackgroundBlur"
