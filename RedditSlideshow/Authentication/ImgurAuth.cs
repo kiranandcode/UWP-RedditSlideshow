@@ -8,6 +8,6 @@ namespace RedditSlideshow.Authentication
 {
     class ImgurAuth
     {
-       public static string client_id = "<YOUR-API-KEY-HERE>";
+       public static string client_id = "<YOUR-CLIENT-ID>";
     }
 }

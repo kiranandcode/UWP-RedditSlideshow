@@ -43,7 +43,6 @@ using RedditSlideshow.Models.Imgur;
 namespace RedditSlideshow.Views
 {
 
-    
 
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
@@ -52,6 +51,7 @@ namespace RedditSlideshow.Views
     {
         ThreadPoolTimer autoforwardTimer;
 
+        CancellationTokenSource downloadTaskCancelToken = new CancellationTokenSource();
 
         SemaphoreSlim totalRequestSemaphore = new SemaphoreSlim(1, 1);
         Boolean MenuExtended = false;
@@ -98,6 +98,8 @@ namespace RedditSlideshow.Views
             {
                 // Deallocate resources.
                 if (autoforwardTimer != null) autoforwardTimer.Cancel();
+                if (downloadTaskCancelToken != null) downloadTaskCancelToken.Cancel();
+
                 this.Frame.GoBack();
             }
         }
@@ -113,8 +115,13 @@ namespace RedditSlideshow.Views
 
             List<string> urls = e.Parameter as List<string>;
 
-            GenerateImages(urls).ContinueWith((result) =>
+            GenerateImages(urls, downloadTaskCancelToken.Token).ContinueWith((result) =>
             {
+                Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    ContentLoadingPanel.Visibility = Visibility.Collapsed;
+                });
+
                 for (int i = 0; i< result.Result.Count-1; i++)
                 {
                     MediaUrl obj = result.Result[i];
@@ -154,7 +161,7 @@ namespace RedditSlideshow.Views
 
 
 
-                if (result.Result.Count == 0)
+                if (result.Result.Count == 0 && !downloadTaskCancelToken.Token.IsCancellationRequested)
                 {
                     // No Urls retrieved, show error, return to sender.
 
@@ -195,7 +202,7 @@ namespace RedditSlideshow.Views
 
         }
 
-        private static async Task<List<MediaUrl>> GenerateImages(List<string> urls)
+        private async Task<List<MediaUrl>> GenerateImages(List<string> urls, CancellationToken token)
         {
             // Regex for checking image items
             Regex image_expr = new Regex(@".(?:jpg|jpeg|png|bmp|gif|gifv)$");
@@ -214,7 +221,7 @@ namespace RedditSlideshow.Views
             {
 
                 string imgur_available_url = "https://api.imgur.com/3/credits";
-
+                if (token.IsCancellationRequested) return new List<MediaUrl>();
                 try
                 {
                     var reqMsg = new HttpRequestMessage(HttpMethod.Get, imgur_available_url);
@@ -230,16 +237,33 @@ namespace RedditSlideshow.Views
                     {
                         imgur_remaining = 0;
                     }
-                } catch(HttpRequestException)
+                } catch(HttpRequestException e)
                 {
                     imgur_remaining = 0;
+                    Debug.WriteLine(e);
                 }
-                catch (JsonReaderException)
+                catch (JsonReaderException e)
                 {
                     imgur_remaining = 0;
+                    Debug.WriteLine(e);
+                }
+                catch (NullReferenceException e)
+                {
+
+                } catch(JsonSerializationException e)
+                {
+
+                    Debug.WriteLine(e);
                 }
 
+                int total_link_count = urls.Count;
+                int current_link_count = 0;
+                int current_image_count = 0;
 
+                Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    OverallProgressText.Text = "Processed " + current_link_count + " / " + total_link_count + " Links";
+                });
 
                 IEnumerable<string> full_uris = urls.Select(str => "https://www.reddit.com/" + str + ".json?limit=100");
                 int downloaded = 0;
@@ -248,6 +272,7 @@ namespace RedditSlideshow.Views
 
                 foreach (string link in full_uris)
                 {
+                    if (token.IsCancellationRequested) return new List<MediaUrl>();
                     HttpResponseMessage response = await client.GetAsync(link);
                     if (response.IsSuccessStatusCode)
                     {
@@ -257,6 +282,7 @@ namespace RedditSlideshow.Views
                             var rootResult = JsonConvert.DeserializeObject<Rootobject>(result);
                             foreach (var child in rootResult.data.children)
                             {
+                                if (token.IsCancellationRequested) return new List<MediaUrl>();
                                 if (image_expr.IsMatch(child.data.url))
                                 {
                                     string url;
@@ -277,6 +303,11 @@ namespace RedditSlideshow.Views
                                     if (!String.IsNullOrEmpty(thumb_url) && !String.IsNullOrEmpty(url) && !String.IsNullOrEmpty(self_url)) {
                                         MediaUrl media_obj = new MediaUrl(child.data.title, url, thumb_url, self_url);
                                         list.Add(media_obj);
+                                        current_image_count++;
+                                        Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                                        {
+                                            ImagesCountText.Text = "Loaded " + current_image_count + " Images";
+                                        });
                                     }
                                 }
                                 else if(imgur_album.IsMatch(child.data.url) && imgur_remaining > 500)
@@ -315,6 +346,11 @@ namespace RedditSlideshow.Views
                                                     if (!String.IsNullOrEmpty(thumb_url) && !String.IsNullOrEmpty(url) && !String.IsNullOrEmpty(self_url)) {
                                                         MediaUrl media_obj = new MediaUrl(title, url, thumb_url, self_url);
                                                         list.Add(media_obj);
+                                                        current_image_count++;
+                                                        Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                                                        {
+                                                            ImagesCountText.Text = "Loaded " + current_image_count + " Images";
+                                                        });
                                                     }
                                                 }
 
@@ -323,13 +359,25 @@ namespace RedditSlideshow.Views
 
 
                                     }
-                                    catch (HttpRequestException)
+                                    catch (HttpRequestException e)
                                     {
 
+                                        Debug.WriteLine(e);
                                     }
-                                    catch (JsonReaderException)
+                                    catch (JsonReaderException e)
                                     {
 
+                                        Debug.WriteLine(e);
+                                    }
+                                    catch (NullReferenceException e)
+                                    {
+
+                                        Debug.WriteLine(e);
+                                    }
+                                    catch (JsonSerializationException e)
+                                    {
+
+                                        Debug.WriteLine(e);
                                     }
 
                                 } else if(imgur_unmarked.IsMatch(child.data.url) && imgur_remaining > 500)
@@ -367,6 +415,11 @@ namespace RedditSlideshow.Views
                                                     if (!String.IsNullOrEmpty(thumb_url) && !String.IsNullOrEmpty(url) && !String.IsNullOrEmpty(self_url)) {
                                                         MediaUrl media_obj = new MediaUrl(title, url, thumb_url, self_url);
                                                         list.Add(media_obj);
+                                                        current_image_count++;
+                                                        Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                                                        {
+                                                            ImagesCountText.Text = "Loaded " + current_image_count + " Images";
+                                                        });
                                                     }
                                                     
                                                 }
@@ -400,38 +453,67 @@ namespace RedditSlideshow.Views
                                                             if (!String.IsNullOrEmpty(thumb_url) && !String.IsNullOrEmpty(url) && !String.IsNullOrEmpty(self_url)) {
                                                                 MediaUrl media_obj = new MediaUrl(title, url, thumb_url, self_url);
                                                                 list.Add(media_obj);
+                                                                current_image_count++;
+                                                                Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                                                                {
+                                                                    ImagesCountText.Text = "Loaded " + current_image_count + " Images";
+                                                                });
                                                             }
                                                         }
                                                     }
 
 
-                                                    } catch(HttpRequestException)
+                                                    } catch(HttpRequestException e)
                                                 {
 
+                                                    Debug.WriteLine(e);
                                                 }
-                                                catch (JsonReaderException)
+                                                catch (JsonReaderException e)
                                                 {
 
+                                                    Debug.WriteLine(e);
+                                                }
+                                                catch (NullReferenceException e)
+                                                {
+
+                                                    Debug.WriteLine(e);
+                                                }
+                                                catch (JsonSerializationException e)
+                                                {
+
+                                                    Debug.WriteLine(e);
                                                 }
                                             }
                                         }
 
 
                                     }
-                                    catch (HttpRequestException)
+                                    catch (HttpRequestException e)
                                     {
 
+                                        Debug.WriteLine(e);
                                     }
-                                    catch (JsonReaderException)
+                                    catch (JsonReaderException e)
                                     {
 
+                                        Debug.WriteLine(e);
+                                    }
+                                    catch (NullReferenceException e)
+                                    {
+
+                                        Debug.WriteLine(e);
+                                    }
+                                    catch (JsonSerializationException e)
+                                    {
+
+                                        Debug.WriteLine(e);
                                     }
 
 
                                 } else if (gfycat_links.IsMatch(child.data.url))
                                 {
                                     Match match = gfycat_links.Match(child.data.url);
-                                    Debug.WriteLine(match.Groups[1]);
+                                    Debug.WriteLine(match.Groups[1] +" <- " + child.data.url);
                                     string gfy_url = "https://gfycat.com/cajax/get/" + match.Groups[1].Value;
                                     Debug.WriteLine(gfy_url);
 
@@ -455,11 +537,30 @@ namespace RedditSlideshow.Views
                                             if (!String.IsNullOrEmpty(thumb_url) && !String.IsNullOrEmpty(gfyurl) && !String.IsNullOrEmpty(self_url)) {
                                                 MediaUrl media_obj = new MediaUrl(child.data.title, gfyurl, thumb_url, self_url);
                                                 list.Add(media_obj);
+                                                current_image_count++;
+                                                Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                                                {
+                                                    ImagesCountText.Text = "Loaded " + current_image_count + " Images";
+                                                });
                                             }
 
                                         }
-                                    } catch(HttpRequestException)
+                                    } catch(HttpRequestException e)
                                     {
+
+                                        Debug.WriteLine(e);
+                                    } catch(NullReferenceException e)
+                                    {
+                                        Debug.WriteLine(e);
+
+                                    }catch(JsonReaderException e)
+                                    {
+
+                                        Debug.WriteLine(e);
+                                    }
+                                    catch (JsonSerializationException e)
+                                    {
+                                        Debug.WriteLine(e);
 
                                     }
                                 }
@@ -468,9 +569,20 @@ namespace RedditSlideshow.Views
                         catch (UriFormatException e)
                         {
                             Debug.WriteLine(e);
-                        } catch(JsonReaderException)
+                        } catch(JsonReaderException e)
                         {
 
+                            Debug.WriteLine(e);
+                        }
+                        catch (NullReferenceException e)
+                        {
+
+                            Debug.WriteLine(e);
+                        }
+                        catch (JsonSerializationException e)
+                        {
+
+                            Debug.WriteLine(e);
                         }
 
                     }
@@ -487,6 +599,12 @@ namespace RedditSlideshow.Views
                         
                         downloaded = downloaded < 60 ? 0 : downloaded - 60;
                     }
+                    current_link_count++;
+                    Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                    {
+                        OverallProgressText.Text = "Processed " + current_link_count + " / " + total_link_count + " Links";
+                        OverallProgressLoader.Value = (float)current_link_count / total_link_count * 100;
+                    });
                 }
             }
             return list;

@@ -36,7 +36,12 @@
             </interactivity:Interaction.Behaviors>
         </Image>
 
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Name="ContentLoadingPanel">
+            <TextBlock Text="Loaded 0 Images" Foreground="White" HorizontalAlignment="Center" Name="ImagesCountText"/>
+            <TextBlock Text="Processed 0/0 Links" Foreground="White" FontSize="10" HorizontalAlignment="Center" Name="OverallProgressText"/>
+            <ProgressBar Value="0" Maximum="100" Name="OverallProgressLoader" Foreground="{StaticResource MainTheme_color_highlight}" Margin="0,10,0,0" Height="10"/>
 
+        </StackPanel>
         <ProgressRing Name="LoadingRing" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center" IsActive="True" />
         <SymbolIcon Name="FailedNotification" Visibility="Collapsed" Symbol="Cancel" HorizontalAlignment="Center" VerticalAlignment="Center" />
 
