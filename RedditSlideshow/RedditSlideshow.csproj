@@ -102,12 +102,17 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Authentication\ImgurAuth.cs" />
     <Compile Include="Controls\ImageView.xaml.cs">
       <DependentUpon>ImageView.xaml</DependentUpon>
     </Compile>
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Models\Gfycat\GfycatImage.cs" />
+    <Compile Include="Models\Imgur\ImgurAlbum.cs" />
+    <Compile Include="Models\Imgur\ImgurCredits.cs" />
+    <Compile Include="Models\Imgur\ImgurImage.cs" />
     <Compile Include="Models\RedditJsonModel.cs" />
     <Compile Include="Models\UtilityModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

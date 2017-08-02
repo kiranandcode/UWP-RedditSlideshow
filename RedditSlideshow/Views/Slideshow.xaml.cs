@@ -34,6 +34,10 @@ using Microsoft.Gestures;
 using Windows.UI.Xaml.Automation.Peers;
 using Windows.UI.Xaml.Automation.Provider;
 using Windows.UI.Core;
+using RedditSlideshow.Models.Gfycat;
+using RedditSlideshow.Authentication;
+using System.Net.Http.Headers;
+using RedditSlideshow.Models.Imgur;
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
 namespace RedditSlideshow.Views
@@ -143,6 +147,7 @@ namespace RedditSlideshow.Views
 
                 });
 
+                if(result.Result.Count != 0)
                 medialist.Add(result.Result.Last());
 
 
@@ -196,11 +201,51 @@ namespace RedditSlideshow.Views
             Regex image_expr = new Regex(@".(?:jpg|jpeg|png|bmp|gif|gifv)$");
             Regex gifv_expr = new Regex(@".(?:gifv)$");
 
+            // Regex for identifying non-type-labelled imgur links
+            Regex imgur_album = new Regex(@"(?:[a-zA-Z0-0]\.)?imgur.com\/(?:a|gallery|t\/[a-zA-Z0-9]*)\/([a-zA-Z0-9]*)");
+            Regex imgur_unmarked = new Regex(@"(?:[a-zA-Z0-0]\.)?imgur.com\/([a-zA-Z0-9]{3,})");
+
+            // Regex for identifying gfycat(beautifully simple) links
+            Regex gfycat_links = new Regex(@"gfycat.com\/([a-zA-Z0-9]*)");
+            int imgur_remaining = 0;
+
             List<MediaUrl> list = new List<MediaUrl>();
             using (HttpClient client = new HttpClient())
             {
 
+                string imgur_available_url = "https://api.imgur.com/3/credits";
+
+                try
+                {
+                    var reqMsg = new HttpRequestMessage(HttpMethod.Get, imgur_available_url);
+                    reqMsg.Headers.Authorization = new AuthenticationHeaderValue("Client-ID", ImgurAuth.client_id);
+                    HttpResponseMessage imgurresponse = await client.SendAsync(reqMsg);
+                    if (imgurresponse.IsSuccessStatusCode)
+                    {
+                        string imgurcontent = await imgurresponse.Content.ReadAsStringAsync();
+
+                        var creditsdata = JsonConvert.DeserializeObject<Creditsobject>(imgurcontent);
+                        imgur_remaining = creditsdata.data.ClientRemaining;
+                    } else
+                    {
+                        imgur_remaining = 0;
+                    }
+                } catch(HttpRequestException)
+                {
+                    imgur_remaining = 0;
+                }
+                catch (JsonReaderException)
+                {
+                    imgur_remaining = 0;
+                }
+
+
+
                 IEnumerable<string> full_uris = urls.Select(str => "https://www.reddit.com/" + str + ".json?limit=100");
+                int downloaded = 0;
+                Stopwatch watch = new Stopwatch();
+                watch.Start();
+
                 foreach (string link in full_uris)
                 {
                     HttpResponseMessage response = await client.GetAsync(link);
@@ -228,16 +273,219 @@ namespace RedditSlideshow.Views
                                     {
                                         thumb_url = child.data.thumbnail;
                                     }
-                                    MediaUrl media_obj = new MediaUrl(child.data.title, url, thumb_url, self_url);
-                                    list.Add(media_obj);
+
+                                    if (!String.IsNullOrEmpty(thumb_url) && !String.IsNullOrEmpty(url) && !String.IsNullOrEmpty(self_url)) {
+                                        MediaUrl media_obj = new MediaUrl(child.data.title, url, thumb_url, self_url);
+                                        list.Add(media_obj);
+                                    }
+                                }
+                                else if(imgur_album.IsMatch(child.data.url) && imgur_remaining > 500)
+                                {
+                                    imgur_remaining--;
+                                    Match match = imgur_album.Match(child.data.url);
+                                    string imgur_album_url = "https://api.imgur.com/3/album/" + match.Groups[1].Value;
+                                    Debug.WriteLine(imgur_album_url);
+                                    try
+                                    {
+                                        var requestMessage = new HttpRequestMessage(HttpMethod.Get, imgur_album_url);
+                                        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Client-ID",ImgurAuth.client_id);
+                                        HttpResponseMessage imgurresponse = await client.SendAsync(requestMessage);
+                                        if (imgurresponse.IsSuccessStatusCode)
+                                        {
+                                            string imgurcontent = await imgurresponse.Content.ReadAsStringAsync();
+
+                                            var imgurdata = JsonConvert.DeserializeObject<Albumobject>(imgurcontent);
+
+
+                                            if (imgurdata.success)
+                                            {
+                                                foreach (Models.Imgur.Image img in imgurdata.data.images)
+                                                {
+                                                    string url = img.link;
+
+                                                    string thumb_url = url;
+                                                    string self_url = "www.reddit.com" + child.data.permalink;
+                                                    if (!String.IsNullOrEmpty(child.data.thumbnail))
+                                                    {
+                                                        thumb_url = child.data.thumbnail;
+                                                    }
+                                                    string title = child.data.title;
+
+
+                                                    if (!String.IsNullOrEmpty(thumb_url) && !String.IsNullOrEmpty(url) && !String.IsNullOrEmpty(self_url)) {
+                                                        MediaUrl media_obj = new MediaUrl(title, url, thumb_url, self_url);
+                                                        list.Add(media_obj);
+                                                    }
+                                                }
+
+                                            }
+                                        }
+
+
+                                    }
+                                    catch (HttpRequestException)
+                                    {
+
+                                    }
+                                    catch (JsonReaderException)
+                                    {
+
+                                    }
+
+                                } else if(imgur_unmarked.IsMatch(child.data.url) && imgur_remaining > 500)
+                                {
+                                    imgur_remaining--;
+                                    Match match = imgur_unmarked.Match(child.data.url);
+                                    string imgur_album_url = "https://api.imgur.com/3/album/" + match.Groups[1].Value;
+                                    Debug.WriteLine(imgur_album_url);
+                                    try
+                                    {
+                                        var requestMessage = new HttpRequestMessage(HttpMethod.Get, imgur_album_url);
+                                        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Client-ID", ImgurAuth.client_id);
+                                        HttpResponseMessage imgurresponse = await client.SendAsync(requestMessage);
+                                        if (imgurresponse.IsSuccessStatusCode)
+                                        {
+                                            string imgurcontent = await imgurresponse.Content.ReadAsStringAsync();
+
+                                            var imgurdata = JsonConvert.DeserializeObject<Albumobject>(imgurcontent);
+
+
+                                            if (imgurdata.success)
+                                            {
+                                                foreach (Models.Imgur.Image img in imgurdata.data.images)
+                                                {
+                                                    string url = img.link;
+
+                                                    string thumb_url = url;
+                                                    string self_url = "www.reddit.com" + child.data.permalink;
+                                                    if (!String.IsNullOrEmpty(child.data.thumbnail))
+                                                    {
+                                                        thumb_url = child.data.thumbnail;
+                                                    }
+                                                    string title = child.data.title;
+
+                                                    if (!String.IsNullOrEmpty(thumb_url) && !String.IsNullOrEmpty(url) && !String.IsNullOrEmpty(self_url)) {
+                                                        MediaUrl media_obj = new MediaUrl(title, url, thumb_url, self_url);
+                                                        list.Add(media_obj);
+                                                    }
+                                                    
+                                                }
+
+                                            } else if(imgur_remaining > 500)
+                                            {
+                                                imgur_remaining--;
+                                                imgur_album_url = "https://api.imgur.com/3/image/" + match.Groups[1].Value;
+                                                try
+                                                {
+                                                    requestMessage = new HttpRequestMessage(HttpMethod.Get, imgur_album_url);
+                                                    requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Client-ID", ImgurAuth.client_id);
+                                                    imgurresponse = await client.SendAsync(requestMessage);
+                                                    if (imgurresponse.IsSuccessStatusCode)
+                                                    {
+                                                        imgurcontent = await imgurresponse.Content.ReadAsStringAsync();
+
+                                                        var imgur_img = JsonConvert.DeserializeObject<Imageobject>(imgurcontent);
+                                                        if(imgur_img.success)
+                                                        {
+                                                            string url = imgur_img.data.link;
+
+                                                            string thumb_url = url;
+                                                            string self_url = "www.reddit.com" + child.data.permalink;
+                                                            if (!String.IsNullOrEmpty(child.data.thumbnail))
+                                                            {
+                                                                thumb_url = child.data.thumbnail;
+                                                            }
+                                                            string title = child.data.title;
+
+                                                            if (!String.IsNullOrEmpty(thumb_url) && !String.IsNullOrEmpty(url) && !String.IsNullOrEmpty(self_url)) {
+                                                                MediaUrl media_obj = new MediaUrl(title, url, thumb_url, self_url);
+                                                                list.Add(media_obj);
+                                                            }
+                                                        }
+                                                    }
+
+
+                                                    } catch(HttpRequestException)
+                                                {
+
+                                                }
+                                                catch (JsonReaderException)
+                                                {
+
+                                                }
+                                            }
+                                        }
+
+
+                                    }
+                                    catch (HttpRequestException)
+                                    {
+
+                                    }
+                                    catch (JsonReaderException)
+                                    {
+
+                                    }
+
+
+                                } else if (gfycat_links.IsMatch(child.data.url))
+                                {
+                                    Match match = gfycat_links.Match(child.data.url);
+                                    Debug.WriteLine(match.Groups[1]);
+                                    string gfy_url = "https://gfycat.com/cajax/get/" + match.Groups[1].Value;
+                                    Debug.WriteLine(gfy_url);
+
+                                    try
+                                    {
+                                        HttpResponseMessage gfyresponse = await client.GetAsync(gfy_url);
+                                        if (gfyresponse.IsSuccessStatusCode)
+                                        {
+                                            string gfycontent = await gfyresponse.Content.ReadAsStringAsync();
+
+                                            var gfydata = JsonConvert.DeserializeObject<Gfyobject>(gfycontent);
+                                            var gfyurl = gfydata.gfyItem.gifUrl;
+
+                                            string thumb_url = gfydata.gfyItem.max2mbGif;
+                                            string self_url = "www.reddit.com" + child.data.permalink;
+                                            if (!String.IsNullOrEmpty(child.data.thumbnail))
+                                            {
+                                                thumb_url = child.data.thumbnail;
+                                            }
+
+                                            if (!String.IsNullOrEmpty(thumb_url) && !String.IsNullOrEmpty(gfyurl) && !String.IsNullOrEmpty(self_url)) {
+                                                MediaUrl media_obj = new MediaUrl(child.data.title, gfyurl, thumb_url, self_url);
+                                                list.Add(media_obj);
+                                            }
+
+                                        }
+                                    } catch(HttpRequestException)
+                                    {
+
+                                    }
                                 }
                             }
                         }
                         catch (UriFormatException e)
                         {
                             Debug.WriteLine(e);
+                        } catch(JsonReaderException)
+                        {
+
                         }
 
+                    }
+                    downloaded++;
+
+                    if(downloaded >= 50)
+                   {
+                        int seconds_since = watch.Elapsed.Seconds;
+                        watch.Reset();
+                        if (seconds_since < 60)
+                        {
+                            await Task.Delay((60 - seconds_since) * 1000);
+                        }
+                        
+                        downloaded = downloaded < 60 ? 0 : downloaded - 60;
                     }
                 }
             }
